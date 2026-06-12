@@ -1,0 +1,30 @@
+# Changelog
+
+Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
+
+## [Iniziale] - 2026-06-12
+### Aggiunto
+- Analisi iniziale dei requisiti basata su README.md e idee.md.
+- Creato file TASKS.md con la lista delle attività previste.
+- Ricerca sui servizi di hosting Python documentata in `docs/hosting.md`, estesa con l'analisi dei database gratuiti.
+- Definizione delle meccaniche di gioco (3 mostriciattoli, PokeAPI, sistema classico) in `docs/meccaniche.md`.
+- Aggiornato TASKS.md con le nuove specifiche confermate dall'utente.
+- Confermato l'utilizzo di **FastAPI** come framework backend.
+- Scelto **PythonAnywhere** per l'hosting e **SQLite** come database.
+- Definizione del modello dati relazionale in `docs/modello-dati.md`.
+- Definizione dettagliata della logica di combattimento in `docs/logica-combattimento.md`.
+- Sketch e mockup descrittivo dell'interfaccia utente in `docs/mockup-interfaccia.md`.
+- Definizione degli endpoint API REST e logica di polling in `docs/api-endpoints.md`.
+- Inizializzazione repository Git e configurazione `.gitignore`.
+- Configurazione ambiente di sviluppo Python (FastAPI, SQLAlchemy, Pytest).
+- Creazione struttura cartelle per il frontend Vanilla JS.
+- Implementazione dei modelli SQLAlchemy in `backend/models/database.py`.
+- Implementazione del client PokeAPI con caching in `backend/pokeapi_client.py`.
+- Creazione di unit test dettagliati per il client PokeAPI in `tests/test_pokeapi_client.py`.
+- Verifica del corretto funzionamento del client tramite script di integrazione.
+- Aggiunta la dipendenza `pytest-asyncio` in `requirements.txt` per supportare i test asincroni.
+
+### Modificato
+- Rimosso l'utilizzo dei WebSockets in favore di HTTP standard (Polling/SSE).
+- Aggiornate le opzioni di hosting in `docs/hosting.md` includendo PythonAnywhere.
+- **Bonifica Nomenclatura**: Sostituiti tutti i riferimenti a marchi registrati (es. "Pokemon") con termini generici ("Zenamon", "mostriciattoli") per conformità legale.
