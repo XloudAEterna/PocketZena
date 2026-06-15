@@ -18,18 +18,18 @@
 ## 3. Sviluppo Backend (Python)
 - [x] Implementazione client per PokeAPI (Nome, Immagine, Tipo) con sistema di caching
 - [x] Unit test e verifica del client PokeAPI
-- [ ] Gestione delle "Stanze" di duello (creazione, accesso tramite codice - solo Multiplayer)
-- [ ] Implementazione logica dei turni (Fase 1: Scelta, Fase 2: Scontro)
-- [ ] Motore di calcolo danni e gestione stato mostriciattoli (3 per giocatore)
-- [ ] Sistema di aggiornamento via HTTP (Polling o Server-Sent Events)
-- [ ] Gestione spettatori e reazioni (Emoji classiche)
+- [x] Gestione delle "Stanze" di duello (creazione, accesso tramite codice - solo Multiplayer)
+- [x] Implementazione logica dei turni (Fase 1: Scelta, Fase 2: Scontro)
+- [x] Motore di calcolo danni e gestione stato mostriciattoli (3 per giocatore)
+- [x] Sistema di aggiornamento via HTTP (Polling o Server-Sent Events)
+- [x] Gestione spettatori e reazioni (Emoji classiche)
 
 ## 4. Sviluppo Frontend (Vanilla JS)
-- [ ] Schermata di Login (Nickname 3 caratteri)
-- [ ] Menu principale (Crea/Entra in duello)
-- [ ] Interfaccia di selezione mostriciattoli (Ricerca libera via PokeAPI)
-- [ ] Interfaccia di combattimento (Board, Animazioni base, Log)
-- [ ] Interfaccia spettatore (Vista passiva + Reazioni con emoji)
+- [x] Schermata di Login (Nickname 3 caratteri)
+- [x] Menu principale (Crea/Entra in duello)
+- [x] Interfaccia di selezione mostriciattoli (Ricerca libera via PokeAPI)
+- [x] Interfaccia di combattimento (Board, Animazioni base, Log)
+- [x] Interfaccia spettatore (Vista passiva + Reazioni con emoji)
 
 ## 5. Test e Validazione
 - [ ] Unit test per la logica di combattimento

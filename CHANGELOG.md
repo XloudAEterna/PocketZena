@@ -23,6 +23,9 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Creazione di unit test dettagliati per il client PokeAPI in `tests/test_pokeapi_client.py`.
 - Verifica del corretto funzionamento del client tramite script di integrazione.
 - Aggiunta la dipendenza `pytest-asyncio` in `requirements.txt` per supportare i test asincroni.
+- Implementazione completa del backend e del frontend per il progetto **POCKET-ZENA**.
+- Sviluppo di un motore di combattimento a turni simultanei con calcolo danni basato sulle statistiche ufficiali.
+- Realizzazione di un'interfaccia utente Vanilla JS reattiva che supporta duelli in tempo reale tramite polling.
 
 ### Modificato
 - Rimosso l'utilizzo dei WebSockets in favore di HTTP standard (Polling/SSE).
