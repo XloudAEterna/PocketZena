@@ -3,6 +3,5 @@ __pycache__/
 .env
 venv/
 .idea/
-.aiassistant/
 .junie/
 *.sqlite3
