@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, ForeignKey, Text
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
 import datetime
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./pocket_zena.sqlite3"
@@ -17,7 +16,7 @@ class Player(Base):
     id = Column(Integer, primary_key=True, index=True)
     nickname = Column(String(3), nullable=False)
     session_token = Column(String, unique=True, index=True)
-    last_active = Column(DateTime, default=datetime.datetime.utcnow)
+    last_active = Column(DateTime, default=lambda: datetime.datetime.now(datetime.UTC))
 
 class ZenamonCache(Base):
     __tablename__ = "zenamon_cache"
@@ -36,7 +35,7 @@ class Duel(Base):
     status = Column(String, default="WAITING") # WAITING, SELECTION, BATTLE, FINISHED
     current_turn = Column(Integer, default=0)
     winner_id = Column(Integer, ForeignKey("players.id"), nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.UTC))
 
 class DuelZenamon(Base):
     __tablename__ = "duel_zenamon"
@@ -64,7 +63,7 @@ class Reaction(Base):
     id = Column(Integer, primary_key=True, index=True)
     duel_id = Column(String, ForeignKey("duels.id"))
     emoji = Column(String)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.UTC))
 
 def init_db():
     Base.metadata.create_all(bind=engine)

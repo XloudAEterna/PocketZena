@@ -10,16 +10,19 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///./test_rooms.sqlite3"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-app.dependency_overrides[get_db] = override_get_db
-
-client = TestClient(app)
+@pytest.fixture
+def client():
+    def override_get_db():
+        try:
+            db = TestingSessionLocal()
+            yield db
+        finally:
+            db.close()
+    
+    app.dependency_overrides[get_db] = override_get_db
+    with TestClient(app) as c:
+        yield c
+    app.dependency_overrides.clear()
 
 @pytest.fixture(autouse=True)
 def setup_db():
@@ -27,20 +30,20 @@ def setup_db():
     yield
     Base.metadata.drop_all(bind=engine)
 
-def test_create_player():
+def test_create_player(client):
     response = client.post("/api/v1/players", json={"nickname": "AAA"})
     assert response.status_code == 200
     data = response.json()
     assert data["nickname"] == "AAA"
     assert "token" in data
 
-def test_create_player_invalid_nickname():
+def test_create_player_invalid_nickname(client):
     response = client.post("/api/v1/players", json={"nickname": "aaa"}) # Non maiuscolo
     assert response.status_code == 422
     response = client.post("/api/v1/players", json={"nickname": "AAAA"}) # Troppo lungo
     assert response.status_code == 422
 
-def test_create_duel():
+def test_create_duel(client):
     # Prima crea un giocatore
     res_player = client.post("/api/v1/players", json={"nickname": "PLA"})
     assert res_player.status_code == 200, res_player.json()
@@ -53,7 +56,7 @@ def test_create_duel():
     assert "duel_code" in data
     assert data["status"] == "WAITING"
 
-def test_join_duel():
+def test_join_duel(client):
     # Crea Giocatore 1
     res_p1 = client.post("/api/v1/players", json={"nickname": "PBA"})
     token1 = res_p1.json()["token"]
@@ -73,14 +76,14 @@ def test_join_duel():
     assert data["success"] is True
     assert data["status"] == "SELECTION"
 
-def test_join_duel_not_found():
+def test_join_duel_not_found(client):
     res_p1 = client.post("/api/v1/players", json={"nickname": "PCA"})
     token1 = res_p1.json()["token"]
     
     response = client.post("/api/v1/duels/NONO/join", headers={"X-Session-Token": token1})
     assert response.status_code == 404
 
-def test_spectate_duel():
+def test_spectate_duel(client):
     # Crea Giocatore 1
     res_p1 = client.post("/api/v1/players", json={"nickname": "PDA"})
     token1 = res_p1.json()["token"]

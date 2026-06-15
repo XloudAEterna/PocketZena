@@ -202,8 +202,8 @@ async def get_duel_status(code: str, db: Session = Depends(get_db)):
     if not duel:
         raise HTTPException(status_code=404, detail="Duello non trovato")
     
-    p1 = db.query(Player).get(duel.player1_id)
-    p2 = db.query(Player).get(duel.player2_id) if duel.player2_id else None
+    p1 = db.get(Player, duel.player1_id)
+    p2 = db.get(Player, duel.player2_id) if duel.player2_id else None
     
     # Dati Zenamon Attivi
     def get_active_info(player_id):
@@ -214,7 +214,7 @@ async def get_duel_status(code: str, db: Session = Depends(get_db)):
             DuelZenamon.is_active == True
         ).first()
         if not active: return None, None, None, None
-        z_cache = db.query(ZenamonCache).get(active.zenamon_id)
+        z_cache = db.get(ZenamonCache, active.zenamon_id)
         max_hp = json.loads(z_cache.base_stats).get("hp", 100)
         return z_cache.name, active.current_hp, max_hp, z_cache.sprite_url
 
@@ -240,7 +240,7 @@ async def get_duel_status(code: str, db: Session = Depends(get_db)):
     reactions = db.query(Reaction).filter(Reaction.duel_id == duel.id).order_by(Reaction.created_at.desc()).limit(5).all()
     reaction_list = [r.emoji for r in reactions]
     
-    winner = db.query(Player).get(duel.winner_id) if duel.winner_id else None
+    winner = db.get(Player, duel.winner_id) if duel.winner_id else None
 
     return {
         "status": duel.status,
