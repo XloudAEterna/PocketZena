@@ -40,8 +40,8 @@ def resolve_turn(duel: Duel, db: Session):
             if new_z and not new_z.is_fainted:
                 old_z.is_active = False
                 new_z.is_active = True
-                z_cache = db.query(ZenamonCache).get(new_z.zenamon_id)
-                player = db.query(Player).get(old_z.player_id)
+                z_cache = db.get(ZenamonCache, new_z.zenamon_id)
+                player = db.get(Player, old_z.player_id)
                 log.append(f"{player.nickname} ritira il suo Zenamon e manda in campo {z_cache.name}!")
                 # Aggiorniamo il riferimento per l'attacco se necessario
                 act["zenamon"] = new_z
@@ -55,7 +55,7 @@ def resolve_turn(duel: Duel, db: Session):
     
     # Ordiniamo per velocità
     def get_speed(dz):
-        z_cache = db.query(ZenamonCache).get(dz.zenamon_id)
+        z_cache = db.get(ZenamonCache, dz.zenamon_id)
         return json.loads(z_cache.base_stats).get("speed", 0)
 
     atk_actions.sort(key=lambda x: get_speed(x["zenamon"]), reverse=True)
@@ -72,7 +72,7 @@ def resolve_turn(duel: Duel, db: Session):
         if attacker_dz.is_fainted: continue # Se è andato KO prima di attaccare
         
         # Recupero dati mossa
-        z_cache_atk = db.query(ZenamonCache).get(attacker_dz.zenamon_id)
+        z_cache_atk = db.get(ZenamonCache, attacker_dz.zenamon_id)
         moves = json.loads(z_cache_atk.moves)
         move_name = atk["action"]["move_name"]
         move = next((m for m in moves if m["name"] == move_name), None)
@@ -88,7 +88,7 @@ def resolve_turn(duel: Duel, db: Session):
         def_stat_name = "defense" if move["damage_class"] == "physical" else "special-defense"
         
         attacker_stats = json.loads(z_cache_atk.base_stats)
-        z_cache_def = db.query(ZenamonCache).get(defender_dz.zenamon_id)
+        z_cache_def = db.get(ZenamonCache, defender_dz.zenamon_id)
         defender_stats = json.loads(z_cache_def.base_stats)
         
         A = attacker_stats.get(atk_stat_name, 50)
@@ -115,11 +115,11 @@ def resolve_turn(duel: Duel, db: Session):
     if check_defeat(duel.player1_id):
         duel.status = "FINISHED"
         duel.winner_id = duel.player2_id
-        log.append("Il duello è terminato! Vincitore: " + db.query(Player).get(duel.player2_id).nickname)
+        log.append("Il duello è terminato! Vincitore: " + db.get(Player, duel.player2_id).nickname)
     elif check_defeat(duel.player2_id):
         duel.status = "FINISHED"
         duel.winner_id = duel.player1_id
-        log.append("Il duello è terminato! Vincitore: " + db.query(Player).get(duel.player1_id).nickname)
+        log.append("Il duello è terminato! Vincitore: " + db.get(Player, duel.player1_id).nickname)
     else:
         # Turno successivo
         duel.current_turn += 1

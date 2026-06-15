@@ -33,7 +33,8 @@ async def test_get_zenamon_data_from_api_and_cache(db_session):
         "stats": [
             {"stat": {"name": "hp"}, "base_stat": 35},
             {"stat": {"name": "attack"}, "base_stat": 55}
-        ]
+        ],
+        "moves": []
     }
     
     # Mockiamo l'AsyncClient e la risposta
@@ -107,7 +108,8 @@ async def test_get_zenamon_data_by_id(db_session):
         "name": "charmander",
         "sprites": {"front_default": "http://example.com/c.png"},
         "types": [{"type": {"name": "fire"}}],
-        "stats": [{"stat": {"name": "hp"}, "base_stat": 39}]
+        "stats": [{"stat": {"name": "hp"}, "base_stat": 39}],
+        "moves": []
     }
     
     with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock_get:

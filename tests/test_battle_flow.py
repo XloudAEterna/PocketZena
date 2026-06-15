@@ -11,15 +11,19 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///./test_flow.sqlite3"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-app.dependency_overrides[get_db] = override_get_db
-client = TestClient(app)
+@pytest.fixture
+def client():
+    def override_get_db():
+        try:
+            db = TestingSessionLocal()
+            yield db
+        finally:
+            db.close()
+    
+    app.dependency_overrides[get_db] = override_get_db
+    with TestClient(app) as c:
+        yield c
+    app.dependency_overrides.clear()
 
 @pytest.fixture(autouse=True)
 def setup_db():
@@ -39,7 +43,7 @@ def setup_db():
     yield
     Base.metadata.drop_all(bind=engine)
 
-def test_full_battle_flow():
+def test_full_battle_flow(client):
     # 1. Preparazione
     p1 = client.post("/api/v1/players", json={"nickname": "AAA"}).json()
     p2 = client.post("/api/v1/players", json={"nickname": "BBB"}).json()
@@ -82,7 +86,7 @@ def test_full_battle_flow():
     assert status["player1"]["active_zenamon_hp"] < status["player1"]["active_zenamon_max_hp"] or \
            status["player2"]["active_zenamon_hp"] < status["player2"]["active_zenamon_max_hp"]
 
-def test_switch_action():
+def test_switch_action(client):
     # 1. Preparazione (come sopra)
     p1 = client.post("/api/v1/players", json={"nickname": "AAA"}).json()
     p2 = client.post("/api/v1/players", json={"nickname": "BBB"}).json()
@@ -107,7 +111,7 @@ def test_switch_action():
     status = client.get(f"/api/v1/duels/{code}/status").json()
     assert status["player1"]["active_zenamon_name"] == "charmander"
 
-def test_full_preparation_flow():
+def test_full_preparation_flow(client):
     # 1. Registrazione Giocatori
     p1 = client.post("/api/v1/players", json={"nickname": "AAA"}).json()
     p2 = client.post("/api/v1/players", json={"nickname": "BBB"}).json()
@@ -135,7 +139,7 @@ def test_full_preparation_flow():
     # Ora dovrebbe essere in fase BATTLE
     assert res2.json()["status"] == "BATTLE"
 
-def test_set_team_invalid_count():
+def test_set_team_invalid_count(client):
     p1 = client.post("/api/v1/players", json={"nickname": "AAA"}).json()
     token = p1["token"]
     duel = client.post("/api/v1/duels", headers={"X-Session-Token": token}).json()
