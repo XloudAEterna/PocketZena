@@ -26,6 +26,7 @@ class ZenamonCache(Base):
     sprite_url = Column(String)
     types = Column(Text) # JSON string
     base_stats = Column(Text) # JSON string
+    moves = Column(Text) # JSON string con le 4 mosse [ {name, power, type, damage_class}, ... ]
 
 class Duel(Base):
     __tablename__ = "duels"

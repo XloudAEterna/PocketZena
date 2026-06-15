@@ -30,5 +30,41 @@ potranno aggiungere delle reazioni che verranno mostrate ai giocatori e agli alt
 
 I dati dei mostriciattoli sono raccolti tramite l'API https://pokeapi.co/
 
-Il gioco è realizzato utilizzando Python e vanilla Javascript.
+Il gioco è realizzato utilizzando Python (FastAPI) e vanilla Javascript.
+
+## Installazione e Avvio
+
+### Prerequisiti
+- Python 3.9+
+- Pip
+
+### Setup Backend
+1. Crea un ambiente virtuale:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Su Windows: venv\Scripts\activate
+   ```
+2. Installa le dipendenze:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Avvia il server:
+   ```bash
+   uvicorn backend.main:app --reload
+   ```
+
+### Setup Frontend
+Il frontend è composto da file statici nella cartella `frontend/`.
+Puoi aprirli direttamente nel browser o servirli tramite un semplice server HTTP (consigliato per evitare problemi di CORS):
+```bash
+# Esempio usando Python
+cd frontend
+python -m http.server 8000
+```
+Assicurati di configurare il proxy o l'URL delle API se necessario.
+
+## Regole di Gioco
+- Ogni giocatore sceglie 3 mostriciattoli (Zenamon).
+- Scontri a turni simultanei.
+- Gli spettatori possono tifare e inviare reazioni emoji.
 

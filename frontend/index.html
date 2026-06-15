@@ -8,9 +8,117 @@
 </head>
 <body>
     <div id="app">
-        <!-- Il contenuto verrà caricato dinamicamente via JS -->
-        <h1>Caricamento POCKET-ZENA...</h1>
+        <!-- Schermata di Login -->
+        <section id="login-page" class="page">
+            <h1>POCKET-ZENA</h1>
+            <div class="card">
+                <p>Inserisci il tuo nickname (3 lettere maiuscole)</p>
+                <input type="text" id="nickname-input" placeholder="ABC" maxlength="3">
+                <button id="login-btn">Entra</button>
+            </div>
+        </section>
+
+        <!-- Menu Principale -->
+        <section id="menu-page" class="page hidden">
+            <h1>Benvenuto, <span id="user-nickname"></span></h1>
+            <div class="menu-options">
+                <button id="create-duel-btn">Crea Duello</button>
+                <div class="join-option">
+                    <input type="text" id="duel-code-input" placeholder="Codice" maxlength="4">
+                    <button id="join-duel-btn">Partecipa</button>
+                </div>
+                <button id="spectate-duel-btn">Spettatore</button>
+            </div>
+        </section>
+
+        <!-- Lobby Attesa -->
+        <section id="lobby-page" class="page hidden">
+            <h1>In attesa di un avversario...</h1>
+            <p>Condividi questo codice: <span id="display-duel-code" class="highlight"></span></p>
+        </section>
+
+        <!-- Selezione Zenamon -->
+        <section id="selection-page" class="page hidden">
+            <h1>Scegli i tuoi 3 Zenamon</h1>
+            <div class="search-bar">
+                <input type="text" id="zenamon-search-input" placeholder="Cerca nome o ID (es: pikachu)">
+                <button id="search-btn">Cerca</button>
+            </div>
+            <div id="search-result" class="zenamon-card hidden">
+                <img id="result-img" src="" alt="">
+                <h3 id="result-name"></h3>
+                <p id="result-types"></p>
+                <div id="result-moves" class="moves-mini"></div>
+                <button id="add-to-team-btn">Aggiungi alla squadra</button>
+            </div>
+            <div class="team-preview">
+                <h3>La tua squadra: (<span id="team-count">0</span>/3)</h3>
+                <div id="team-list"></div>
+                <button id="confirm-team-btn" class="hidden">Conferma Squadra</button>
+            </div>
+        </section>
+
+        <!-- Battaglia -->
+        <section id="battle-page" class="page hidden">
+            <div class="battle-header">
+                <div class="player-info p2">
+                    <span id="p2-name">Avversario</span>
+                    <div class="hp-bar"><div id="p2-hp-fill" class="hp-fill"></div></div>
+                    <span id="p2-hp-text">100/100</span>
+                    <span id="p2-zenamon-name">???</span>
+                </div>
+            </div>
+
+            <div class="battle-arena">
+                <div class="zenamon-sprite-container p2">
+                    <img id="p2-sprite" src="" alt="">
+                    <div id="p2-ready-indicator" class="ready-indicator hidden">PRONTO</div>
+                </div>
+                <div class="zenamon-sprite-container p1">
+                    <img id="p1-sprite" src="" alt="">
+                    <div id="p1-ready-indicator" class="ready-indicator hidden">PRONTO</div>
+                </div>
+            </div>
+
+            <div class="battle-footer">
+                <div class="player-info p1">
+                    <span id="p1-name">Tu</span>
+                    <div class="hp-bar"><div id="p1-hp-fill" class="hp-fill"></div></div>
+                    <span id="p1-hp-text">100/100</span>
+                    <span id="p1-zenamon-name">???</span>
+                </div>
+                
+                <div id="battle-controls" class="controls">
+                    <div id="moves-grid" class="grid"></div>
+                    <button id="show-switch-btn">Cambia</button>
+                </div>
+                
+                <div id="switch-menu" class="hidden">
+                    <h3>Scegli Zenamon:</h3>
+                    <div id="switch-list"></div>
+                    <button id="back-to-moves-btn">Indietro</button>
+                </div>
+
+                <div id="battle-log" class="log"></div>
+            </div>
+            
+            <!-- Reazioni -->
+            <div class="reactions-overlay">
+                <button class="react-btn" data-emoji="🔥">🔥</button>
+                <button class="react-btn" data-emoji="👏">👏</button>
+                <button class="react-btn" data-emoji="😢">😢</button>
+                <button class="react-btn" data-emoji="😲">😲</button>
+            </div>
+            <div id="reactions-display"></div>
+        </section>
+        
+        <!-- Schermata Vittoria -->
+        <section id="result-page" class="page hidden">
+             <h1 id="winner-text"></h1>
+             <button onclick="location.reload()">Torna al Menu</button>
+        </section>
     </div>
+
     <script src="js/app.js"></script>
 </body>
 </html>

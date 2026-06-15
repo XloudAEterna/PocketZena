@@ -21,7 +21,8 @@ async def get_zenamon_data(zenamon_name_or_id: str, db: Session):
             "name": cached.name,
             "sprite_url": cached.sprite_url,
             "types": json.loads(cached.types),
-            "base_stats": json.loads(cached.base_stats)
+            "base_stats": json.loads(cached.base_stats),
+            "moves": json.loads(cached.moves) if cached.moves else []
         }
 
     # 2. Se non in cache, chiama PokeAPI
@@ -38,13 +39,36 @@ async def get_zenamon_data(zenamon_name_or_id: str, db: Session):
             types = [t["type"]["name"] for t in data["types"]]
             stats = {s["stat"]["name"]: s["base_stat"] for s in data["stats"]}
             
+            # Recupero delle prime 4 mosse che hanno potenza
+            moves = []
+            possible_moves = data["moves"]
+            
+            for m in possible_moves:
+                if len(moves) >= 4:
+                    break
+                
+                move_url = m["move"]["url"]
+                move_res = await client.get(move_url)
+                if move_res.status_code == 200:
+                    move_data = move_res.json()
+                    if move_data.get("power"):
+                        moves.append({
+                            "name": move_data["name"],
+                            "power": move_data["power"],
+                            "type": move_data["type"]["name"],
+                            "damage_class": move_data["damage_class"]["name"]
+                        } )
+            
+            # Se ha meno di 4 mosse con potenza, pazienza, ma solitamente ne hanno molte.
+
             # 3. Salva in cache
             new_zenamon = ZenamonCache(
                 id=zenamon_id,
                 name=name,
                 sprite_url=sprite_url,
                 types=json.dumps(types),
-                base_stats=json.dumps(stats)
+                base_stats=json.dumps(stats),
+                moves=json.dumps(moves)
             )
             db.add(new_zenamon)
             db.commit()
@@ -55,7 +79,8 @@ async def get_zenamon_data(zenamon_name_or_id: str, db: Session):
                 "name": name,
                 "sprite_url": sprite_url,
                 "types": types,
-                "base_stats": stats
+                "base_stats": stats,
+                "moves": moves
             }
         except httpx.HTTPStatusError:
             return None
