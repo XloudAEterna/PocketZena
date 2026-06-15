@@ -16,7 +16,7 @@
 - [x] Configurazione framework di test (pytest)
 
 ## 3. Sviluppo Backend (Python)
-- [x] Implementazione client per PokeAPI (Nome, Immagine, Tipo) con sistema di caching
+- [x] Implementazione client per PokeAPI (Nome, Immagine, Tipo) con sistema di caching e supporto alla ricerca parziale
 - [x] Unit test e verifica del client PokeAPI
 - [x] Gestione delle "Stanze" di duello (creazione, accesso tramite codice - solo Multiplayer)
 - [x] Implementazione logica dei turni (Fase 1: Scelta, Fase 2: Scontro)

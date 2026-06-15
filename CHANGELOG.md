@@ -3,6 +3,7 @@
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
 ### Aggiunto
+- Supporto alla **ricerca parziale degli Zenamon**: ora è possibile digitare solo una parte del nome (es. "pika") per trovare il mostriciattolo corrispondente.
 - Configurazione della pipeline CI/CD tramite GitHub Actions (`.github/workflows/`).
 - Workflow per test automatizzati e deploy automatico del frontend su GitHub Pages.
 - Adattatore WSGI `passenger_wsgi.py` per il supporto a PythonAnywhere.

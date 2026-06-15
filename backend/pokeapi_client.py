@@ -3,18 +3,72 @@ import json
 import asyncio
 from sqlalchemy.orm import Session
 from .models.database import ZenamonCache
+from sqlalchemy import or_
 
 POKEAPI_BASE_URL = "https://pokeapi.co/api/v2"
 
+# Cache in memoria per la lista dei nomi per supportare la ricerca parziale
+_ZENAMON_NAMES_CACHE = []
+_CACHE_LOCK = asyncio.Lock()
+
+async def _get_all_names():
+    global _ZENAMON_NAMES_CACHE
+    if _ZENAMON_NAMES_CACHE:
+        return _ZENAMON_NAMES_CACHE
+    
+    async with _CACHE_LOCK:
+        if _ZENAMON_NAMES_CACHE:
+            return _ZENAMON_NAMES_CACHE
+        
+        async with httpx.AsyncClient() as client:
+            try:
+                # Recuperiamo tutti i nomi (circa 1300 attualmente)
+                response = await client.get(f"{POKEAPI_BASE_URL}/pokemon?limit=2000")
+                if response.status_code == 200:
+                    data = response.json()
+                    _ZENAMON_NAMES_CACHE = [r["name"] for r in data["results"]]
+            except Exception as e:
+                print(f"Errore nel recupero della lista nomi da PokeAPI: {e}")
+    
+    return _ZENAMON_NAMES_CACHE
+
 async def get_zenamon_data(zenamon_name_or_id: str, db: Session):
-    # 1. Controlla in cache locale (DB)
+    # 1. Pulizia input
     zenamon_name_or_id = str(zenamon_name_or_id).lower().strip()
     
     if not zenamon_name_or_id:
         return None
     
-    # Cerchiamo per nome o per ID
-    if zenamon_name_or_id.isdigit():
+    # 2. Se non è un ID, proviamo a risolvere il nome parziale
+    is_id = zenamon_name_or_id.isdigit()
+    
+    if not is_id:
+        # 1. Cerchiamo un match esatto (in cache o nella lista completa)
+        exact_cached = db.query(ZenamonCache).filter(ZenamonCache.name == zenamon_name_or_id).first()
+        if exact_cached:
+            zenamon_name_or_id = exact_cached.name
+        else:
+            all_names = await _get_all_names()
+            if zenamon_name_or_id in all_names:
+                # È un nome esatto, non facciamo nulla e proseguiamo
+                pass
+            else:
+                # 2. Se non è un match esatto, cerchiamo un match parziale
+                # Prima in cache locale
+                partial_cached = db.query(ZenamonCache).filter(ZenamonCache.name.like(f"{zenamon_name_or_id}%")).first()
+                if partial_cached:
+                    zenamon_name_or_id = partial_cached.name
+                else:
+                    # Poi nella lista completa
+                    match = next((n for n in all_names if n.startswith(zenamon_name_or_id)), None)
+                    if not match:
+                        match = next((n for n in all_names if zenamon_name_or_id in n), None)
+                    
+                    if match:
+                        zenamon_name_or_id = match
+
+    # 3. Controlla in cache locale (DB) con il nome risolto (o ID)
+    if is_id:
         cached = db.query(ZenamonCache).filter(ZenamonCache.id == int(zenamon_name_or_id)).first()
     else:
         cached = db.query(ZenamonCache).filter(ZenamonCache.name == zenamon_name_or_id).first()

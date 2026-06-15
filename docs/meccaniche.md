@@ -4,7 +4,7 @@ Il gioco segue le regole classiche dei duelli tra mostriciattoli tascabili, con 
 
 ## 1. Selezione Mostriciattoli
 Ogni giocatore deve comporre una squadra di **3 mostriciattoli**.
-- La selezione è **libera**: il giocatore può cercare qualsiasi mostriciattolo tramite il database di **PokeAPI**.
+- La selezione è **libera**: il giocatore può cercare qualsiasi mostriciattolo tramite il database di **PokeAPI** (supporta la ricerca parziale, es. digitando "char" si troverà "charmander").
 - Per ogni mostriciattolo selezionato vengono mostrati:
     - **Nome**
     - **Immagine** (Sprite ufficiale)
