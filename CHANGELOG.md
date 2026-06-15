@@ -2,7 +2,19 @@
 
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
-## [Iniziale] - 2026-06-12
+### Aggiunto
+- Configurazione della pipeline CI/CD tramite GitHub Actions (`.github/workflows/`).
+- Workflow per test automatizzati e deploy automatico del frontend su GitHub Pages.
+- Adattatore WSGI `passenger_wsgi.py` per il supporto a PythonAnywhere.
+- Guida dettagliata al deploy in `docs/deploy.md`.
+- Manuale di gioco per l'utente finale in `docs/manuale.md`.
+
+### Modificato
+- Aggiornato `requirements.txt` con la dipendenza `a2wsgi`.
+- Aggiornato `README.md` con link alla documentazione e istruzioni per il deploy.
+- Sincronizzato `TASKS.md` con lo stato finale del progetto.
+
+### [Iniziale] - 2026-06-12
 ### Aggiunto
 - Analisi iniziale dei requisiti basata su README.md e idee.md.
 - Creato file TASKS.md con la lista delle attività previste.

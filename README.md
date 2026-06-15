@@ -63,7 +63,20 @@ python -m http.server 8000
 ```
 Assicurati di configurare il proxy o l'URL delle API se necessario.
 
-## Regole di Gioco
+## CI/CD e Deploy
+Il progetto utilizza **GitHub Actions** per l'integrazione continua e il deploy automatico del frontend.
+- **CI**: Ad ogni push su `main`, vengono eseguiti i test con `pytest`.
+- **Deploy Frontend**: Le modifiche alla cartella `frontend/` vengono pubblicate automaticamente su **GitHub Pages**.
+
+Per istruzioni dettagliate su come pubblicare il backend su **PythonAnywhere**, consulta la [Guida al Deploy](docs/deploy.md).
+
+## Documentazione e Regole
+- [Modello Dati](docs/modello-dati.md)
+- [Meccaniche di Gioco](docs/meccaniche.md)
+- [Logica di Combattimento](docs/logica-combattimento.md)
+- [Manuale di Gioco](docs/manuale.md)
+
+## Regole di Gioco (Sintesi)
 - Ogni giocatore sceglie 3 mostriciattoli (Zenamon).
 - Scontri a turni simultanei.
 - Gli spettatori possono tifare e inviare reazioni emoji.

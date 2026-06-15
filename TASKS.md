@@ -37,10 +37,10 @@
 - [x] Bug fixing e rifiniture
 
 ## 6. Deploy
-- [ ] Configurazione della pipeline di CI/CD
-- [ ] Deploy del backend sul servizio scelto
-- [ ] Deploy del frontend (es. GitHub Pages o Vercel)
+- [x] Configurazione della pipeline di CI/CD
+- [x] Deploy del backend sul servizio scelto (Documentato in deploy.md)
+- [x] Deploy del frontend (es. GitHub Pages o Vercel)
 
-## 6. Documentazione
-- [ ] Aggiornamento README.md con istruzioni di installazione e avvio
-- [ ] Creazione manuale di gioco (regole di combattimento)
+## 7. Documentazione
+- [x] Aggiornamento README.md con istruzioni di installazione e avvio
+- [x] Creazione manuale di gioco (regole di combattimento)
