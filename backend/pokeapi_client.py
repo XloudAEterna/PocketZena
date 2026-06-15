@@ -32,6 +32,48 @@ async def _get_all_names():
     
     return _ZENAMON_NAMES_CACHE
 
+async def search_zenamon_names(query: str, limit: int = 10):
+    query = query.lower().strip()
+    if not query:
+        return []
+    
+    all_names = await _get_all_names()
+    
+    # Priorità: 1. Inizia con, 2. Contiene
+    matches = [n for n in all_names if n.startswith(query)]
+    if len(matches) < limit:
+        contains = [n for n in all_names if query in n and n not in matches]
+        matches.extend(contains)
+    
+    return matches[:limit]
+
+async def get_zenamon_basic_data(name: str, db: Session):
+    """Versione leggera di get_zenamon_data che non recupera le mosse se non necessario."""
+    cached = db.query(ZenamonCache).filter(ZenamonCache.name == name).first()
+    if cached:
+        return {
+            "id": cached.id,
+            "name": cached.name,
+            "sprite_url": cached.sprite_url,
+            "types": json.loads(cached.types)
+        }
+    
+    # Se non in cache, recuperiamo solo i dati base da PokeAPI
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(f"{POKEAPI_BASE_URL}/pokemon/{name}")
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    "id": data["id"],
+                    "name": data["name"],
+                    "sprite_url": data["sprites"]["front_default"],
+                    "types": [t["type"]["name"] for t in data["types"]]
+                }
+        except:
+            pass
+    return {"name": name}
+
 async def get_zenamon_data(zenamon_name_or_id: str, db: Session):
     # 1. Pulizia input
     zenamon_name_or_id = str(zenamon_name_or_id).lower().strip()

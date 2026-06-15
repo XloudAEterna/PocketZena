@@ -1,13 +1,24 @@
 from pydantic import BaseModel
 from typing import List, Optional
 
+class ZenamonStatus(BaseModel):
+    name: str
+    current_hp: int
+    max_hp: int
+    is_fainted: bool
+
 class PlayerBattleStatus(BaseModel):
     nickname: str
     active_zenamon_name: Optional[str] = None
     active_zenamon_hp: Optional[int] = None
     active_zenamon_max_hp: Optional[int] = None
     active_zenamon_sprite: Optional[str] = None
-    is_ready: bool # Se ha già inviato l'azione per il turno corrente
+    team: Optional[List[ZenamonStatus]] = None # Squadra completa con HP
+    is_ready: bool
+
+class ReactionResponse(BaseModel):
+    id: int
+    emoji: str
 
 class BattleStatusResponse(BaseModel):
     status: str
@@ -15,7 +26,7 @@ class BattleStatusResponse(BaseModel):
     player1: PlayerBattleStatus
     player2: PlayerBattleStatus
     new_events: List[str]
-    reactions: List[str]
+    reactions: List[ReactionResponse]
     winner_nickname: Optional[str] = None
 
 class BattleAction(BaseModel):

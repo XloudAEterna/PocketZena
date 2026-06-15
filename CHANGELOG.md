@@ -13,6 +13,8 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Manuale di gioco per l'utente finale in `docs/manuale.md`.
 
 ### Corretto
+- Risolto errore `NameError: asyncio` e bug di definizione Pydantic (`Optional`) nell'endpoint di ricerca Zenamon parziale.
+- Migliorato il feedback visivo nel frontend durante la ricerca: ora viene mostrato un messaggio di errore specifico in caso di problemi tecnici del server invece del generico "Nessun Zenamon trovato".
 - Risolto errore 400 Bad Request nelle operazioni POST del frontend tramite l'introduzione di una gestione errori più robusta e messaggi di feedback all'utente.
 - Allentati i vincoli del nickname nel backend (ora accetta lettere e numeri, lunghezza 3-10) per evitare errori di validazione inaspettati.
 - Aggiunta validazione e feedback visivo nel frontend per la fase di login, ricerca Zenamon e invio azioni di battaglia.

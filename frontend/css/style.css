@@ -39,6 +39,47 @@ body {
 
 .hidden { display: none !important; }
 
+.search-item {
+    background: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+    margin-bottom: 5px;
+}
+
+.search-item:hover {
+    background: #e0e0e0;
+}
+
+/* Animazioni */
+@keyframes pulse-red {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.1); filter: brightness(1.5) sepia(1) hue-rotate(-50deg) saturate(5); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+.pulse-damage {
+    animation: pulse-red 0.5s ease-in-out 4; /* 2 secondi totali */
+}
+
+/* Reazioni */
+.reaction-emoji {
+    position: absolute;
+    font-size: 2rem;
+    pointer-events: none;
+    animation: float-up 2s forwards;
+    z-index: 100;
+}
+
+@keyframes float-up {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-100px); opacity: 0; }
+}
+
 h1 { text-align: center; color: var(--secondary); }
 
 button {

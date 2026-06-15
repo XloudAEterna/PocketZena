@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from typing import List
+from typing import List, Optional
 
 class MoveResponse(BaseModel):
     name: str
@@ -15,6 +15,15 @@ class ZenamonResponse(BaseModel):
     types: List[str]
     sprite: str
     moves: List[MoveResponse]
+
+class ZenamonSearchItem(BaseModel):
+    id: Optional[int] = None
+    name: str
+    types: Optional[List[str]] = None
+    sprite: Optional[str] = None
+
+class ZenamonSearchResult(BaseModel):
+    results: List[ZenamonSearchItem]
 
 class TeamCreate(BaseModel):
     zenamon_ids: List[int] # Devono essere esattamente 3

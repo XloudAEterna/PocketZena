@@ -2,6 +2,7 @@ import uuid
 import random
 import string
 import json
+import asyncio
 from fastapi import FastAPI, Depends, HTTPException, Header, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -11,9 +12,9 @@ from typing import List, Optional
 from backend.models.database import SessionLocal, engine, Base, Player, Duel, ZenamonCache, DuelZenamon, Turn, Reaction, init_db
 from backend.schemas.player import PlayerCreate, PlayerResponse
 from backend.schemas.duel import DuelCreateResponse, DuelJoinResponse, DuelSpectateResponse
-from backend.schemas.zenamon import ZenamonResponse, TeamCreate
+from backend.schemas.zenamon import ZenamonResponse, TeamCreate, ZenamonSearchResult
 from backend.schemas.battle import BattleStatusResponse, PlayerBattleStatus, BattleAction, ReactionCreate
-from backend.pokeapi_client import get_zenamon_data
+from backend.pokeapi_client import get_zenamon_data, search_zenamon_names, get_zenamon_basic_data
 from backend.battle_engine import resolve_turn
 
 # Inizializza il DB all'avvio
@@ -130,9 +131,30 @@ async def spectate_duel(code: str, current_player: Player = Depends(get_current_
         "role": "SPECTATOR"
     }
 
-@app.get("/api/v1/zenamon/search", response_model=ZenamonResponse)
+@app.get("/api/v1/zenamon/search", response_model=ZenamonSearchResult)
 async def search_zenamon(name: str, db: Session = Depends(get_db)):
-    data = await get_zenamon_data(name, db)
+    names = await search_zenamon_names(name)
+    if not names:
+        return {"results": []}
+    
+    # Carichiamo i dati base per tutti i nomi trovati
+    tasks = [get_zenamon_basic_data(n, db) for n in names]
+    results = await asyncio.gather(*tasks)
+    
+    formatted_results = []
+    for r in results:
+        formatted_results.append({
+            "id": r.get("id"),
+            "name": r["name"],
+            "types": r.get("types"),
+            "sprite": r.get("sprite_url")
+        })
+    
+    return {"results": formatted_results}
+
+@app.get("/api/v1/zenamon/{name_or_id}", response_model=ZenamonResponse)
+async def get_zenamon_details(name_or_id: str, db: Session = Depends(get_db)):
+    data = await get_zenamon_data(name_or_id, db)
     if not data:
         raise HTTPException(status_code=404, detail="Zenamon non trovato")
     
@@ -212,26 +234,63 @@ async def get_duel_status(code: str, db: Session = Depends(get_db)):
     p1 = db.get(Player, duel.player1_id)
     p2 = db.get(Player, duel.player2_id) if duel.player2_id else None
     
+    turn = db.query(Turn).filter(Turn.duel_id == duel.id, Turn.turn_number == duel.current_turn).first()
+
     # Dati Zenamon Attivi
-    def get_active_info(player_id):
-        if not player_id: return None, None, None, None
+    def get_player_info(player_id):
+        if not player_id: return {
+            "nickname": "---", "active_zenamon_name": None, "active_zenamon_hp": None, 
+            "active_zenamon_max_hp": None, "active_zenamon_sprite": None, "team": [], "is_ready": False
+        }
+        
+        # Info Zenamon Attivo
         active = db.query(DuelZenamon).filter(
             DuelZenamon.duel_id == duel.id, 
             DuelZenamon.player_id == player_id,
             DuelZenamon.is_active == True
         ).first()
-        if not active: return None, None, None, None
-        z_cache = db.get(ZenamonCache, active.zenamon_id)
-        max_hp = json.loads(z_cache.base_stats).get("hp", 100)
-        return z_cache.name, active.current_hp, max_hp, z_cache.sprite_url
+        
+        z_name, z_hp, z_max, z_sprite = None, None, None, None
+        if active:
+            z_cache = db.get(ZenamonCache, active.zenamon_id)
+            z_max = json.loads(z_cache.base_stats).get("hp", 100)
+            z_name, z_hp, z_sprite = z_cache.name, active.current_hp, z_cache.sprite_url
+            
+        # Info Squadra
+        team_dz = db.query(DuelZenamon).filter(
+            DuelZenamon.duel_id == duel.id, 
+            DuelZenamon.player_id == player_id
+        ).order_by(DuelZenamon.position).all()
+        
+        team_status = []
+        for dz in team_dz:
+            zc = db.get(ZenamonCache, dz.zenamon_id)
+            m_hp = json.loads(zc.base_stats).get("hp", 100)
+            team_status.append({
+                "name": zc.name,
+                "current_hp": dz.current_hp,
+                "max_hp": m_hp,
+                "is_fainted": dz.is_fainted
+            })
+            
+        ready = False
+        if turn:
+            ready = (turn.p1_action is not None) if player_id == duel.player1_id else (turn.p2_action is not None)
+            
+        player_obj = db.get(Player, player_id)
+        
+        return {
+            "nickname": player_obj.nickname,
+            "active_zenamon_name": z_name,
+            "active_zenamon_hp": z_hp,
+            "active_zenamon_max_hp": z_max,
+            "active_zenamon_sprite": z_sprite,
+            "team": team_status,
+            "is_ready": ready
+        }
 
-    p1_z_name, p1_z_hp, p1_z_max, p1_z_sprite = get_active_info(duel.player1_id)
-    p2_z_name, p2_z_hp, p2_z_max, p2_z_sprite = get_active_info(duel.player2_id)
-    
-    # Verifica se i giocatori sono pronti per il turno corrente
-    turn = db.query(Turn).filter(Turn.duel_id == duel.id, Turn.turn_number == duel.current_turn).first()
-    p1_ready = turn.p1_action is not None if turn else False
-    p2_ready = turn.p2_action is not None if turn else False
+    p1_info = get_player_info(duel.player1_id)
+    p2_info = get_player_info(duel.player2_id)
     
     # Eventi (Log del turno precedente o corrente se processato)
     events = []
@@ -244,30 +303,16 @@ async def get_duel_status(code: str, db: Session = Depends(get_db)):
         events = last_processed_turn.resolution_log.split("\n")
     
     # Reazioni
-    reactions = db.query(Reaction).filter(Reaction.duel_id == duel.id).order_by(Reaction.created_at.desc()).limit(5).all()
-    reaction_list = [r.emoji for r in reactions]
+    reactions = db.query(Reaction).filter(Reaction.duel_id == duel.id).order_by(Reaction.created_at.desc()).limit(10).all()
+    reaction_list = [{"id": r.id, "emoji": r.emoji} for r in reactions]
     
     winner = db.get(Player, duel.winner_id) if duel.winner_id else None
 
     return {
         "status": duel.status,
         "current_turn": duel.current_turn,
-        "player1": {
-            "nickname": p1.nickname,
-            "active_zenamon_name": p1_z_name,
-            "active_zenamon_hp": p1_z_hp,
-            "active_zenamon_max_hp": p1_z_max,
-            "active_zenamon_sprite": p1_z_sprite,
-            "is_ready": p1_ready
-        },
-        "player2": {
-            "nickname": p2.nickname if p2 else "---",
-            "active_zenamon_name": p2_z_name,
-            "active_zenamon_hp": p2_z_hp,
-            "active_zenamon_max_hp": p2_z_max,
-            "active_zenamon_sprite": p2_z_sprite,
-            "is_ready": p2_ready
-        } if p2 else { "nickname": "---", "is_ready": False },
+        "player1": p1_info,
+        "player2": p2_info,
         "new_events": events,
         "reactions": reaction_list,
         "winner_nickname": winner.nickname if winner else None

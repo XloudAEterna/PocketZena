@@ -4,8 +4,12 @@ let state = {
     token: '',
     duelCode: '',
     role: '',
+    cheeringFor: 'P1',
     team: [],
     status: {},
+    lastShownReactionId: 0,
+    lastReactionTime: 0,
+    currentBattleHP: { p1: 0, p2: 0 },
     pollingInterval: null
 };
 
@@ -90,12 +94,25 @@ document.getElementById('spectate-duel-btn').onclick = async () => {
     if (data.success) {
         state.duelCode = code;
         state.role = 'SPECTATOR';
+        document.getElementById('spectator-controls').classList.remove('hidden');
         showPage('battle-page');
         startPolling();
     } else {
         const msg = data.detail ? (Array.isArray(data.detail) ? data.detail[0].msg : data.detail) : "Impossibile assistere";
         alert("Errore: " + msg);
     }
+};
+
+document.getElementById('cheer-p1-btn').onclick = () => {
+    state.cheeringFor = 'P1';
+    alert("Ora tifi per P1!");
+    if (state.status) updateBattleUI(state.status);
+};
+
+document.getElementById('cheer-p2-btn').onclick = () => {
+    state.cheeringFor = 'P2';
+    alert("Ora tifi per P2!");
+    if (state.status) updateBattleUI(state.status);
 };
 
 document.getElementById('create-duel-btn').onclick = async () => {
@@ -162,43 +179,99 @@ function updateUI(status) {
 }
 
 function displayReactions(reactions) {
-    const container = document.getElementById('reactions-display');
-    // Per evitare di ridisegnare tutto ogni volta e far ripartire le animazioni
-    // potremmo confrontare, ma per semplicità ora facciamo così.
-    if (reactions.length > 0) {
-        container.innerHTML = reactions.map(r => `<span class="floating-emoji">${r}</span>`).join('');
+    if (!reactions || reactions.length === 0) return;
+    
+    // Le reazioni arrivano ordinate dalla più recente alla meno recente
+    // Noi vogliamo mostrare solo quelle con ID > lastShownReactionId
+    const newReactions = reactions.filter(r => r.id > state.lastShownReactionId).reverse();
+    
+    if (newReactions.length > 0) {
+        const container = document.getElementById('reactions-display');
+        newReactions.forEach(r => {
+            const span = document.createElement('span');
+            span.className = 'reaction-emoji';
+            span.innerText = r.emoji;
+            // Posizione casuale orizzontale per varietà
+            span.style.left = Math.random() * 80 + 10 + '%';
+            span.style.bottom = '20%';
+            
+            container.appendChild(span);
+            
+            // Rimuoviamo l'elemento dopo l'animazione (2s)
+            setTimeout(() => {
+                span.remove();
+            }, 2000);
+            
+            state.lastShownReactionId = Math.max(state.lastShownReactionId, r.id);
+        });
     }
 }
 
 function updateBattleUI(status) {
-    const isP1 = status.player1.nickname === state.nickname;
-    const me = isP1 ? status.player1 : status.player2;
-    const opp = isP1 ? status.player2 : status.player1;
-
-    document.getElementById('p1-name').innerText = me.nickname;
-    document.getElementById('p1-hp-text').innerText = `${me.active_zenamon_hp}/${me.active_zenamon_max_hp}`;
-    document.getElementById('p1-hp-fill').style.width = (me.active_zenamon_hp / me.active_zenamon_max_hp * 100) + '%';
-    document.getElementById('p1-zenamon-name').innerText = me.active_zenamon_name;
-
-    document.getElementById('p2-name').innerText = opp.nickname;
-    document.getElementById('p2-hp-text').innerText = `${opp.active_zenamon_hp}/${opp.active_zenamon_max_hp}`;
-    document.getElementById('p2-hp-fill').style.width = (opp.active_zenamon_hp / opp.active_zenamon_max_hp * 100) + '%';
-    document.getElementById('p2-zenamon-name').innerText = opp.active_zenamon_name;
+    state.status = status; // Salviamo lo stato per aggiornamenti manuali (es. cambio tifo)
     
-    // Il giocatore vede il proprio Zenamon di spalle
+    // Determiniamo chi va sotto (bottom) e chi va sopra (top)
+    let bottom, top;
     const isSpectator = state.role === 'SPECTATOR';
-    document.getElementById('p1-sprite').src = isSpectator ? me.active_zenamon_sprite : getBackSprite(me.active_zenamon_sprite);
-    document.getElementById('p2-sprite').src = opp.active_zenamon_sprite;
     
-    document.getElementById('p1-ready-indicator').classList.toggle('hidden', !me.is_ready);
-    document.getElementById('p2-ready-indicator').classList.toggle('hidden', !opp.is_ready);
+    if (isSpectator) {
+        if (state.cheeringFor === 'P2') {
+            bottom = status.player2;
+            top = status.player1;
+        } else {
+            bottom = status.player1;
+            top = status.player2;
+        }
+    } else {
+        const isP1 = status.player1.nickname === state.nickname;
+        bottom = isP1 ? status.player1 : status.player2;
+        top = isP1 ? status.player2 : status.player1;
+    }
 
-    // Gestione visibilità controlli
-    const hasSentAction = me.is_ready;
-    document.getElementById('battle-controls').classList.toggle('hidden', hasSentAction);
-    document.getElementById('waiting-turn').classList.toggle('hidden', !hasSentAction);
-    if (!hasSentAction && document.getElementById('switch-menu').classList.contains('hidden')) {
-        document.getElementById('battle-controls').classList.remove('hidden');
+    // Animazione pulse se HP calano
+    if (state.currentBattleHP.p1 > status.player1.active_zenamon_hp) {
+        const sprite = (bottom === status.player1) ? 'p1-sprite' : 'p2-sprite';
+        document.getElementById(sprite).classList.add('pulse-damage');
+        setTimeout(() => document.getElementById(sprite).classList.remove('pulse-damage'), 2000);
+    }
+    if (state.currentBattleHP.p2 > status.player2.active_zenamon_hp) {
+        const sprite = (bottom === status.player2) ? 'p1-sprite' : 'p2-sprite';
+        document.getElementById(sprite).classList.add('pulse-damage');
+        setTimeout(() => document.getElementById(sprite).classList.remove('pulse-damage'), 2000);
+    }
+    state.currentBattleHP.p1 = status.player1.active_zenamon_hp;
+    state.currentBattleHP.p2 = status.player2.active_zenamon_hp;
+
+    // Aggiornamento UI
+    document.getElementById('p1-name').innerText = bottom.nickname;
+    document.getElementById('p1-hp-text').innerText = `${bottom.active_zenamon_hp}/${bottom.active_zenamon_max_hp}`;
+    document.getElementById('p1-hp-fill').style.width = (bottom.active_zenamon_hp / bottom.active_zenamon_max_hp * 100) + '%';
+    document.getElementById('p1-zenamon-name').innerText = bottom.active_zenamon_name;
+
+    document.getElementById('p2-name').innerText = top.nickname;
+    document.getElementById('p2-hp-text').innerText = `${top.active_zenamon_hp}/${top.active_zenamon_max_hp}`;
+    document.getElementById('p2-hp-fill').style.width = (top.active_zenamon_hp / top.active_zenamon_max_hp * 100) + '%';
+    document.getElementById('p2-zenamon-name').innerText = top.active_zenamon_name;
+    
+    // Lo Zenamon sotto si vede di spalle, quello sopra di fronte
+    document.getElementById('p1-sprite').src = getBackSprite(bottom.active_zenamon_sprite);
+    document.getElementById('p2-sprite').src = top.active_zenamon_sprite;
+    
+    document.getElementById('p1-ready-indicator').classList.toggle('hidden', !bottom.is_ready);
+    document.getElementById('p2-ready-indicator').classList.toggle('hidden', !top.is_ready);
+
+    // Gestione visibilità controlli (solo se giocatore)
+    if (!isSpectator) {
+        const me = (status.player1.nickname === state.nickname) ? status.player1 : status.player2;
+        const hasSentAction = me.is_ready;
+        document.getElementById('battle-controls').classList.toggle('hidden', hasSentAction);
+        document.getElementById('waiting-turn').classList.toggle('hidden', !hasSentAction);
+        if (!hasSentAction && document.getElementById('switch-menu').classList.contains('hidden')) {
+            document.getElementById('battle-controls').classList.remove('hidden');
+        }
+    } else {
+        document.getElementById('battle-controls').classList.add('hidden');
+        document.getElementById('waiting-turn').classList.add('hidden');
     }
 
     const logDiv = document.getElementById('battle-log');
@@ -221,17 +294,45 @@ document.getElementById('search-btn').onclick = async () => {
     btn.disabled = false;
     btn.innerText = "Cerca";
 
+    const resultsList = document.getElementById('search-results-list');
+    const resultDetail = document.getElementById('search-result');
+    resultsList.innerHTML = '';
+    resultDetail.classList.add('hidden');
+
+    if (data.error) {
+        alert("Errore durante la ricerca: " + (data.detail || "Server error"));
+        resultsList.classList.add('hidden');
+    } else if (data.results && data.results.length > 0) {
+        resultsList.classList.remove('hidden');
+        data.results.forEach(z => {
+            const div = document.createElement('div');
+            div.className = 'search-item';
+            div.innerHTML = `
+                <img src="${z.sprite || ''}" alt="${z.name}" style="width: 50px;">
+                <span>${z.name.toUpperCase()}</span>
+            `;
+            div.onclick = () => selectZenamon(z.name);
+            resultsList.appendChild(div);
+        });
+    } else {
+        alert("Nessun Zenamon trovato.");
+        resultsList.classList.add('hidden');
+    }
+};
+
+async function selectZenamon(nameOrId) {
+    const data = await apiGet(`/zenamon/${nameOrId}`);
     if (data.id) {
         currentSearchResult = data;
         document.getElementById('result-name').innerText = data.name.toUpperCase();
         document.getElementById('result-img').src = data.sprite;
         document.getElementById('result-types').innerText = data.types.join(' / ');
         document.getElementById('search-result').classList.remove('hidden');
+        document.getElementById('search-results-list').classList.add('hidden');
     } else {
-        alert("Zenamon non trovato o errore nella ricerca.");
-        document.getElementById('search-result').classList.add('hidden');
+        alert("Errore nel recupero dei dettagli.");
     }
-};
+}
 
 document.getElementById('add-to-team-btn').onclick = () => {
     if (state.team.length < 3 && !state.team.find(z => z.id === currentSearchResult.id)) {
@@ -311,13 +412,16 @@ function renderSwitchList() {
     const list = document.getElementById('switch-list');
     const status = state.status;
     const isP1 = status.player1.nickname === state.nickname;
-    const myActiveName = isP1 ? status.player1.active_zenamon_name : status.player2.active_zenamon_name;
+    const me = isP1 ? status.player1 : status.player2;
+    const myActiveName = me.active_zenamon_name;
 
-    list.innerHTML = state.team.map((z, index) => {
+    // Usiamo la squadra restituita dal backend con gli HP aggiornati
+    list.innerHTML = me.team.map((z, index) => {
         const isCurrent = z.name === myActiveName;
+        const isFainted = z.current_hp <= 0;
         return `
-            <button class="switch-btn" ${isCurrent ? 'disabled' : ''} onclick="confirmSwitch(${index + 1})">
-                ${z.name.toUpperCase()} ${isCurrent ? '(In campo)' : ''}
+            <button class="switch-btn" ${isCurrent || isFainted ? 'disabled' : ''} onclick="confirmSwitch(${index + 1})">
+                ${z.name.toUpperCase()} (${z.current_hp}/${z.max_hp}) ${isCurrent ? '(In campo)' : ''} ${isFainted ? '(Svenuto)' : ''}
             </button>
         `;
     }).join('');
@@ -334,6 +438,14 @@ window.sendBattleAction = sendBattleAction; // Rendi globale per onclick
 // Reazioni
 document.querySelectorAll('.react-btn').forEach(btn => {
     btn.onclick = async () => {
+        const now = Date.now();
+        if (now - state.lastReactionTime < 5000) {
+            const remaining = Math.ceil((5000 - (now - state.lastReactionTime)) / 1000);
+            alert(`Attendi ancora ${remaining} secondi prima di un'altra reazione!`);
+            return;
+        }
+        
+        state.lastReactionTime = now;
         const emoji = btn.getAttribute('data-emoji');
         await apiPost(`/duels/${state.duelCode}/reaction`, { emoji });
     };

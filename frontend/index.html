@@ -44,6 +44,9 @@
                 <input type="text" id="zenamon-search-input" placeholder="Cerca nome o ID (es: pikachu)">
                 <button id="search-btn">Cerca</button>
             </div>
+            <div id="search-results-list" class="grid hidden">
+                <!-- Lista di risultati brevi -->
+            </div>
             <div id="search-result" class="zenamon-card hidden">
                 <img id="result-img" src="" alt="">
                 <h3 id="result-name"></h3>
@@ -60,6 +63,11 @@
 
         <!-- Battaglia -->
         <section id="battle-page" class="page hidden">
+            <div id="spectator-controls" class="hidden" style="text-align: center; margin-bottom: 10px;">
+                <span>Tifa per:</span>
+                <button id="cheer-p1-btn" style="padding: 5px 10px; font-size: 0.8rem;">P1</button>
+                <button id="cheer-p2-btn" style="padding: 5px 10px; font-size: 0.8rem;">P2</button>
+            </div>
             <div class="battle-header">
                 <div class="player-info p2">
                     <span id="p2-name">Avversario</span>
