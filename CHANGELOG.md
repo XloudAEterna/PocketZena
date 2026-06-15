@@ -26,6 +26,8 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Implementazione completa del backend e del frontend per il progetto **POCKET-ZENA**.
 - Sviluppo di un motore di combattimento a turni simultanei con calcolo danni basato sulle statistiche ufficiali.
 - Realizzazione di un'interfaccia utente Vanilla JS reattiva che supporta duelli in tempo reale tramite polling.
+- Implementazione di unit test dedicati per il motore di combattimento (`tests/test_battle_engine.py`).
+- Risolti problemi di sincronizzazione del database nei calcoli di fine duello tramite `db.flush()`.
 
 ### Modificato
 - Rimosso l'utilizzo dei WebSockets in favore di HTTP standard (Polling/SSE).
