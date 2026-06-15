@@ -18,17 +18,15 @@ def resolve_turn(duel: Duel, db: Session):
     p2_active = db.query(DuelZenamon).filter(DuelZenamon.duel_id == duel.id, DuelZenamon.player_id == duel.player2_id, DuelZenamon.is_active == True).first()
     
     # Logica semplificata:
-    # 1. Gestione Switch (priorità massima)
-    # 2. Gestione Attacchi (in base alla velocità)
-    
     actions = [
         {"player": 1, "action": p1_action, "zenamon": p1_active},
         {"player": 2, "action": p2_action, "zenamon": p2_active}
     ]
     
-    # 1. Switch
+    # 1. Switch (Priorità massima)
     for act in actions:
-        if act["action"]["type"] == "SWITCH":
+        # Se c'è un indice di zenamon nell'azione (sia tipo SWITCH che tipo combinato)
+        if act["action"].get("zenamon_index") is not None:
             new_pos = act["action"]["zenamon_index"]
             old_z = act["zenamon"]
             new_z = db.query(DuelZenamon).filter(
@@ -43,15 +41,18 @@ def resolve_turn(duel: Duel, db: Session):
                 z_cache = db.get(ZenamonCache, new_z.zenamon_id)
                 player = db.get(Player, old_z.player_id)
                 log.append(f"{player.nickname} ritira il suo Zenamon e manda in campo {z_cache.name}!")
-                # Aggiorniamo il riferimento per l'attacco se necessario
+                # Aggiorniamo il riferimento per la fase di attacco
                 act["zenamon"] = new_z
     
-    # Aggiorniamo riferimenti dopo switch
+    # Aggiorniamo riferimenti per comodità
     p1_active = db.query(DuelZenamon).filter(DuelZenamon.duel_id == duel.id, DuelZenamon.player_id == duel.player1_id, DuelZenamon.is_active == True).first()
     p2_active = db.query(DuelZenamon).filter(DuelZenamon.duel_id == duel.id, DuelZenamon.player_id == duel.player2_id, DuelZenamon.is_active == True).first()
 
-    # 2. Attacchi
-    atk_actions = [a for a in actions if a["action"]["type"] == "ATTACK"]
+    # 2. Attacchi (in base alla velocità)
+    atk_actions = []
+    for act in actions:
+        if act["action"].get("move_name"):
+            atk_actions.append(act)
     
     # Ordiniamo per velocità
     def get_speed(dz):
@@ -113,11 +114,18 @@ def resolve_turn(duel: Duel, db: Session):
         fainted_count = db.query(DuelZenamon).filter(DuelZenamon.duel_id == duel.id, DuelZenamon.player_id == player_id, DuelZenamon.is_fainted == True).count()
         return fainted_count == 3
 
-    if check_defeat(duel.player1_id):
+    p1_defeated = check_defeat(duel.player1_id)
+    p2_defeated = check_defeat(duel.player2_id)
+
+    if p1_defeated and p2_defeated:
+        duel.status = "FINISHED"
+        duel.winner_id = None
+        log.append("Il duello è terminato in pareggio!")
+    elif p1_defeated:
         duel.status = "FINISHED"
         duel.winner_id = duel.player2_id
         log.append("Il duello è terminato! Vincitore: " + db.get(Player, duel.player2_id).nickname)
-    elif check_defeat(duel.player2_id):
+    elif p2_defeated:
         duel.status = "FINISHED"
         duel.winner_id = duel.player1_id
         log.append("Il duello è terminato! Vincitore: " + db.get(Player, duel.player1_id).nickname)

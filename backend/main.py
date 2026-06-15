@@ -331,6 +331,17 @@ async def send_action(code: str, action: BattleAction, current_player: Player = 
     if not turn:
         raise HTTPException(status_code=500, detail="Turno non trovato")
 
+    # Validazione Zenamon esausto: deve switchare
+    active_zenamon = db.query(DuelZenamon).filter(
+        DuelZenamon.duel_id == duel.id,
+        DuelZenamon.player_id == current_player.id,
+        DuelZenamon.is_active == True
+    ).first()
+    
+    if active_zenamon and active_zenamon.is_fainted:
+        if action.type != "SWITCH" and action.zenamon_index is None:
+            raise HTTPException(status_code=400, detail="Il tuo Zenamon è esausto, devi cambiarlo!")
+
     if current_player.id == duel.player1_id:
         if turn.p1_action:
             raise HTTPException(status_code=400, detail="Azione già inviata per questo turno")

@@ -10,6 +10,7 @@ let state = {
     lastShownReactionId: 0,
     lastReactionTime: 0,
     currentBattleHP: { p1: 0, p2: 0 },
+    pendingSwitchIndex: null,
     pollingInterval: null
 };
 
@@ -264,10 +265,27 @@ function updateBattleUI(status) {
     if (!isSpectator) {
         const me = (status.player1.nickname === state.nickname) ? status.player1 : status.player2;
         const hasSentAction = me.is_ready;
-        document.getElementById('battle-controls').classList.toggle('hidden', hasSentAction);
-        document.getElementById('waiting-turn').classList.toggle('hidden', !hasSentAction);
-        if (!hasSentAction && document.getElementById('switch-menu').classList.contains('hidden')) {
-            document.getElementById('battle-controls').classList.remove('hidden');
+        
+        if (hasSentAction) {
+            document.getElementById('battle-controls').classList.add('hidden');
+            document.getElementById('switch-menu').classList.add('hidden');
+            document.getElementById('waiting-turn').classList.remove('hidden');
+        } else {
+            document.getElementById('waiting-turn').classList.add('hidden');
+            
+            // Se lo Zenamon attivo è svenuto, obbliga lo switch
+            if (bottom.active_zenamon_hp === 0) {
+                document.getElementById('battle-controls').classList.add('hidden');
+                document.getElementById('switch-menu').classList.remove('hidden');
+                document.getElementById('back-to-moves-btn').classList.add('hidden');
+                renderSwitchList();
+            } else {
+                document.getElementById('back-to-moves-btn').classList.remove('hidden');
+                // Mostra controlli normali solo se non siamo nel menu switch
+                if (document.getElementById('switch-menu').classList.contains('hidden')) {
+                    document.getElementById('battle-controls').classList.remove('hidden');
+                }
+            }
         }
     } else {
         document.getElementById('battle-controls').classList.add('hidden');
@@ -363,17 +381,24 @@ document.getElementById('confirm-team-btn').onclick = async () => {
 };
 
 // --- Battaglia ---
-function renderMoves() {
+function renderMoves(zenamonIndex = null) {
     const grid = document.getElementById('moves-grid');
-    // Trova lo Zenamon attivo in squadra
     const status = state.status;
+    if (!status || !status.player1) return;
+
     const isP1 = status.player1.nickname === state.nickname;
-    const myActiveName = isP1 ? status.player1.active_zenamon_name : status.player2.active_zenamon_name;
+    const me = isP1 ? status.player1 : status.player2;
     
-    // Recuperiamo le mosse dallo stato (le abbiamo salvate quando abbiamo cercato gli Zenamon)
-    const myZenamon = state.team.find(z => z.name === myActiveName);
-    if (myZenamon && myZenamon.moves) {
-        grid.innerHTML = myZenamon.moves.map(m => `
+    let targetZenamon;
+    if (zenamonIndex) {
+        const zenamonName = me.team[zenamonIndex-1].name;
+        targetZenamon = state.team.find(z => z.name === zenamonName);
+    } else {
+        targetZenamon = state.team.find(z => z.name === me.active_zenamon_name);
+    }
+    
+    if (targetZenamon && targetZenamon.moves) {
+        grid.innerHTML = targetZenamon.moves.map(m => `
             <button class="move-btn" onclick="sendBattleAction('ATTACK', '${m.name}')">
                 ${m.name}<br><small>${m.type} (${m.power})</small>
             </button>
@@ -386,8 +411,14 @@ async function sendBattleAction(type, moveName = null, zenamonIndex = null) {
     if (moveName) body.move_name = moveName;
     if (zenamonIndex) body.zenamon_index = zenamonIndex;
     
+    // Se abbiamo uno switch in sospeso (es. cambio volontario + mossa o obbligo switch + mossa)
+    if (state.pendingSwitchIndex) {
+        body.zenamon_index = state.pendingSwitchIndex;
+    }
+    
     const data = await apiPost(`/duels/${state.duelCode}/action`, body);
     if (data.accepted) {
+        state.pendingSwitchIndex = null; // Reset
         document.getElementById('battle-controls').classList.add('hidden');
         document.getElementById('switch-menu').classList.add('hidden');
         document.getElementById('waiting-turn').classList.remove('hidden');
@@ -404,8 +435,10 @@ document.getElementById('show-switch-btn').onclick = () => {
 };
 
 document.getElementById('back-to-moves-btn').onclick = () => {
+    state.pendingSwitchIndex = null;
     document.getElementById('switch-menu').classList.add('hidden');
     document.getElementById('battle-controls').classList.remove('hidden');
+    renderMoves();
 };
 
 function renderSwitchList() {
@@ -428,8 +461,10 @@ function renderSwitchList() {
 }
 
 async function confirmSwitch(index) {
-    await sendBattleAction('SWITCH', null, index);
-    document.getElementById('back-to-moves-btn').click();
+    state.pendingSwitchIndex = index;
+    document.getElementById('switch-menu').classList.add('hidden');
+    document.getElementById('battle-controls').classList.remove('hidden');
+    renderMoves(index);
 }
 
 window.confirmSwitch = confirmSwitch;

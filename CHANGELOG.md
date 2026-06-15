@@ -3,9 +3,13 @@
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
 ### Aggiunto
+- Supporto alla scelta della mossa nello stesso turno in cui si effettua uno switch dello Zenamon.
+- Gestione del pareggio nel duello se entrambi i giocatori esauriscono i mostriciattoli nello stesso turno.
 - Visualizzazione dello **sprite retro (back-sprite)** per il mostriciattolo del giocatore locale, per simulare la prospettiva classica dei giochi tascabili.
-- Supporto completo per la modalità **Spettatore** nel frontend, inclusa la corretta gestione della visualizzazione e delle reazioni emoji.
-- Supporto alla **ricerca parziale degli Zenamon**: ora è possibile digitare solo una parte del nome (es. "pika") per trovare il mostriciattolo corrispondente.
+- Supporto completo per la modalità **Spettatore** nel frontend, inclusa la corretta gestione della visualizzazione e delle reazioni emoji con cooldown di 5 secondi.
+- Supporto alla **ricerca parziale degli Zenamon** con visualizzazione di almeno 10 risultati.
+- Animazioni CSS `pulse-damage` e `float-up` per feedback visivo durante il duello.
+- Visualizzazione HP (attuale/massimo) nella schermata di switch.
 - Configurazione della pipeline CI/CD tramite GitHub Actions (`.github/workflows/`).
 - Workflow per test automatizzati e deploy automatico del frontend su GitHub Pages.
 - Adattatore WSGI `passenger_wsgi.py` per il supporto a PythonAnywhere.
@@ -13,6 +17,7 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Manuale di gioco per l'utente finale in `docs/manuale.md`.
 
 ### Corretto
+- Implementato l'obbligo di switch per lo Zenamon esausto: il giocatore non può attaccare finché non cambia il mostriciattolo attivo.
 - Risolto errore `sqlalchemy.exc.ArgumentError` durante lo switch del mostriciattolo per il secondo giocatore, causato da un'errata precedenza degli operatori nella query del database.
 - Risolto errore `NameError: asyncio` e bug di definizione Pydantic (`Optional`) nell'endpoint di ricerca Zenamon parziale.
 - Migliorato il feedback visivo nel frontend durante la ricerca: ora viene mostrato un messaggio di errore specifico in caso di problemi tecnici del server invece del generico "Nessun Zenamon trovato".
