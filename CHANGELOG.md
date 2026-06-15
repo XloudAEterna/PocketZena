@@ -12,6 +12,7 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 ### Corretto
 - Risolto errore 404 nell'accesso al frontend tramite `/frontend/index.html`.
 - Eliminato conflitto tra rotta API root e caricamento statici.
+- **Risolto bug ricerca Zenamon**: Aggiunta colonna `moves` mancante nel database SQLite e ottimizzato il client PokeAPI per una ricerca più veloce e robusta (parallelizzazione delle chiamate alle mosse).
 
 ### [Iniziale] - 2026-06-12
 ### Aggiunto
