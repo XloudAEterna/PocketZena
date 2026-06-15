@@ -7,7 +7,7 @@ Ogni giocatore deve comporre una squadra di **3 mostriciattoli**.
 - La selezione è **libera**: il giocatore può cercare qualsiasi mostriciattolo tramite il database di **PokeAPI** (supporta la ricerca parziale, es. digitando "char" si troverà "charmander").
 - Per ogni mostriciattolo selezionato vengono mostrati:
     - **Nome**
-    - **Immagine** (Sprite ufficiale)
+    - **Immagine** (Sprite ufficiale: di spalle per il proprio mostriciattolo in battaglia, di fronte per l'avversario)
     - **Tipo/i** (es. Fuoco, Acqua, Erba)
 
 ## 2. Sistema di Combattimento

@@ -3,6 +3,8 @@
 Tutti i cambiamenti significativi a questo progetto saranno documentati in questo file.
 
 ### Aggiunto
+- Visualizzazione dello **sprite retro (back-sprite)** per il mostriciattolo del giocatore locale, per simulare la prospettiva classica dei giochi tascabili.
+- Supporto completo per la modalità **Spettatore** nel frontend, inclusa la corretta gestione della visualizzazione e delle reazioni emoji.
 - Supporto alla **ricerca parziale degli Zenamon**: ora è possibile digitare solo una parte del nome (es. "pika") per trovare il mostriciattolo corrispondente.
 - Configurazione della pipeline CI/CD tramite GitHub Actions (`.github/workflows/`).
 - Workflow per test automatizzati e deploy automatico del frontend su GitHub Pages.

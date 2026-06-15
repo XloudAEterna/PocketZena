@@ -9,6 +9,12 @@ let state = {
     pollingInterval: null
 };
 
+function getBackSprite(url) {
+    if (!url) return url;
+    // PokeAPI sprites: pokemon/X.png -> pokemon/back/X.png
+    return url.replace('/pokemon/', '/pokemon/back/');
+}
+
 // --- Navigazione ---
 function showPage(pageId) {
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
@@ -71,6 +77,24 @@ document.getElementById('login-btn').onclick = async () => {
     } else {
         const msg = data.detail ? (Array.isArray(data.detail) ? data.detail[0].msg : data.detail) : "Errore durante il login";
         alert("Errore login: " + msg);
+    }
+};
+
+document.getElementById('spectate-duel-btn').onclick = async () => {
+    const code = document.getElementById('duel-code-input').value.toUpperCase();
+    if (!code) {
+        alert("Inserisci un codice!");
+        return;
+    }
+    const data = await apiPost(`/duels/${code}/spectate`, {});
+    if (data.success) {
+        state.duelCode = code;
+        state.role = 'SPECTATOR';
+        showPage('battle-page');
+        startPolling();
+    } else {
+        const msg = data.detail ? (Array.isArray(data.detail) ? data.detail[0].msg : data.detail) : "Impossibile assistere";
+        alert("Errore: " + msg);
     }
 };
 
@@ -161,7 +185,9 @@ function updateBattleUI(status) {
     document.getElementById('p2-hp-fill').style.width = (opp.active_zenamon_hp / opp.active_zenamon_max_hp * 100) + '%';
     document.getElementById('p2-zenamon-name').innerText = opp.active_zenamon_name;
     
-    document.getElementById('p1-sprite').src = me.active_zenamon_sprite;
+    // Il giocatore vede il proprio Zenamon di spalle
+    const isSpectator = state.role === 'SPECTATOR';
+    document.getElementById('p1-sprite').src = isSpectator ? me.active_zenamon_sprite : getBackSprite(me.active_zenamon_sprite);
     document.getElementById('p2-sprite').src = opp.active_zenamon_sprite;
     
     document.getElementById('p1-ready-indicator').classList.toggle('hidden', !me.is_ready);

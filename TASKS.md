@@ -28,7 +28,7 @@
 - [x] Schermata di Login (Nickname 3 caratteri)
 - [x] Menu principale (Crea/Entra in duello)
 - [x] Interfaccia di selezione mostriciattoli (Ricerca libera via PokeAPI)
-- [x] Interfaccia di combattimento (Board, Animazioni base, Log)
+- [x] Interfaccia di combattimento (Board, Animazioni base, Log, Sprite retro per il giocatore)
 - [x] Interfaccia spettatore (Vista passiva + Reazioni con emoji)
 
 ## 5. Test e Validazione
