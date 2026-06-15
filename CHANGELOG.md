@@ -13,6 +13,7 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Manuale di gioco per l'utente finale in `docs/manuale.md`.
 
 ### Corretto
+- Risolto errore `sqlalchemy.exc.ArgumentError` durante lo switch del mostriciattolo per il secondo giocatore, causato da un'errata precedenza degli operatori nella query del database.
 - Risolto errore `NameError: asyncio` e bug di definizione Pydantic (`Optional`) nell'endpoint di ricerca Zenamon parziale.
 - Migliorato il feedback visivo nel frontend durante la ricerca: ora viene mostrato un messaggio di errore specifico in caso di problemi tecnici del server invece del generico "Nessun Zenamon trovato".
 - Risolto errore 400 Bad Request nelle operazioni POST del frontend tramite l'introduzione di una gestione errori più robusta e messaggi di feedback all'utente.

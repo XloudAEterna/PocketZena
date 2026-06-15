@@ -33,7 +33,7 @@ def resolve_turn(duel: Duel, db: Session):
             old_z = act["zenamon"]
             new_z = db.query(DuelZenamon).filter(
                 DuelZenamon.duel_id == duel.id, 
-                DuelZenamon.player_id == duel.player1_id if act["player"] == 1 else duel.player2_id,
+                DuelZenamon.player_id == (duel.player1_id if act["player"] == 1 else duel.player2_id),
                 DuelZenamon.position == new_pos
             ).first()
             
