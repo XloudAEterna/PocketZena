@@ -107,6 +107,7 @@ def resolve_turn(duel: Duel, db: Session):
         else:
             log.append(f"{z_cache_def.name} subisce {damage} danni.")
             
+    db.flush()
     # Verifica Fine Duello
     def check_defeat(player_id):
         fainted_count = db.query(DuelZenamon).filter(DuelZenamon.duel_id == duel.id, DuelZenamon.player_id == player_id, DuelZenamon.is_fainted == True).count()

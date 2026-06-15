@@ -32,9 +32,9 @@
 - [x] Interfaccia spettatore (Vista passiva + Reazioni con emoji)
 
 ## 5. Test e Validazione
-- [ ] Unit test per la logica di combattimento
-- [ ] Test di integrazione per il flusso del duello
-- [ ] Bug fixing e rifiniture
+- [x] Unit test per la logica di combattimento
+- [x] Test di integrazione per il flusso del duello
+- [x] Bug fixing e rifiniture
 
 ## 6. Deploy
 - [ ] Configurazione della pipeline di CI/CD
