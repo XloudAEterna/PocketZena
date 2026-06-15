@@ -13,7 +13,7 @@
             <h1>POCKET-ZENA</h1>
             <div class="card">
                 <p>Inserisci il tuo nickname (3 lettere maiuscole)</p>
-                <input type="text" id="nickname-input" placeholder="ABC" maxlength="3">
+                <input type="text" id="nickname-input" placeholder="NOME" maxlength="10">
                 <button id="login-btn">Entra</button>
             </div>
         </section>
@@ -91,6 +91,10 @@
                 <div id="battle-controls" class="controls">
                     <div id="moves-grid" class="grid"></div>
                     <button id="show-switch-btn">Cambia</button>
+                </div>
+
+                <div id="waiting-turn" class="hidden">
+                    <p class="waiting-msg">In attesa della mossa dell'avversario...</p>
                 </div>
                 
                 <div id="switch-menu" class="hidden">

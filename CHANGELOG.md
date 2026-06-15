@@ -11,9 +11,12 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Manuale di gioco per l'utente finale in `docs/manuale.md`.
 
 ### Corretto
+- Risolto errore 400 Bad Request nelle operazioni POST del frontend tramite l'introduzione di una gestione errori più robusta e messaggi di feedback all'utente.
+- Allentati i vincoli del nickname nel backend (ora accetta lettere e numeri, lunghezza 3-10) per evitare errori di validazione inaspettati.
+- Aggiunta validazione e feedback visivo nel frontend per la fase di login, ricerca Zenamon e invio azioni di battaglia.
 - Risolto errore 404 nell'accesso al frontend tramite `/frontend/index.html`.
 - Eliminato conflitto tra rotta API root e caricamento statici.
-- **Risolto bug ricerca Zenamon**: Aggiunta colonna `moves` mancante nel database SQLite e ottimizzato il client PokeAPI per una ricerca più veloce e robusta (parallelizzazione delle chiamate alle mosse).
+- **Risolto bug ricerca Zenamon**: Aggiunta colonna `moves` mancante nel database SQLite e ottimizzato il client PokeAPI per una ricerca più veloce e robusta.
 
 ### [Iniziale] - 2026-06-12
 ### Aggiunto

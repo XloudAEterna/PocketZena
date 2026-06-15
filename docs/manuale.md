@@ -3,7 +3,7 @@
 Benvenuto in **POCKET-ZENA**, il gioco di combattimento tra mostriciattoli (Zenamon) basato su PokeAPI!
 
 ## 1. Preparazione
-- **Login**: Inserisci un nickname di 3 lettere (es. "ZNA").
+- **Login**: Inserisci un nickname di almeno 3 caratteri (es. "ZENAMON1").
 - **Crea/Entra**: Crea una stanza e comunica il codice al tuo amico, oppure entra in una stanza esistente inserendo il codice di 4 caratteri.
 - **Spettatore**: Puoi entrare in una stanza come spettatore per vedere il duello in corso e inviare reazioni.
 
