@@ -9,10 +9,9 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Guida dettagliata al deploy in `docs/deploy.md`.
 - Manuale di gioco per l'utente finale in `docs/manuale.md`.
 
-### Modificato
-- Aggiornato `requirements.txt` con la dipendenza `a2wsgi`.
-- Aggiornato `README.md` con link alla documentazione e istruzioni per il deploy.
-- Sincronizzato `TASKS.md` con lo stato finale del progetto.
+### Corretto
+- Risolto errore 404 nell'accesso al frontend tramite `/frontend/index.html`.
+- Eliminato conflitto tra rotta API root e caricamento statici.
 
 ### [Iniziale] - 2026-06-12
 ### Aggiunto
@@ -42,6 +41,9 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Risolti problemi di sincronizzazione del database nei calcoli di fine duello tramite `db.flush()`.
 
 ### Modificato
+- Aggiornato `requirements.txt` con la dipendenza `a2wsgi`.
+- Aggiornato `README.md` con link alla documentazione e istruzioni per il deploy.
+- Sincronizzato `TASKS.md` con lo stato finale del progetto.
 - Rimosso l'utilizzo dei WebSockets in favore di HTTP standard (Polling/SSE).
 - Aggiornate le opzioni di hosting in `docs/hosting.md` includendo PythonAnywhere.
 - **Bonifica Nomenclatura**: Sostituiti tutti i riferimenti a marchi registrati (es. "Pokemon") con termini generici ("Zenamon", "mostriciattoli") per conformità legale.

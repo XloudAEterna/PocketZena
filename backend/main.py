@@ -3,6 +3,8 @@ import random
 import string
 import json
 from fastapi import FastAPI, Depends, HTTPException, Header, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
@@ -18,6 +20,15 @@ from backend.battle_engine import resolve_turn
 init_db()
 
 app = FastAPI(title="POCKET-ZENA API")
+
+# Configurazione CORS per sviluppo locale
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Dependency per il database
 def get_db():
@@ -40,10 +51,6 @@ async def get_current_player(x_session_token: str = Header(...), db: Session = D
             detail="Sessione non valida"
         )
     return player
-
-@app.get("/")
-async def root():
-    return {"message": "Benvenuti in POCKET-ZENA API"}
 
 @app.post("/api/v1/players", response_model=PlayerResponse)
 async def create_player(player_in: PlayerCreate, db: Session = Depends(get_db)):
@@ -312,3 +319,8 @@ async def send_reaction(code: str, reaction_in: ReactionCreate, current_player: 
     db.commit()
     
     return {"success": True}
+
+# Monta i file statici del frontend alla fine per non interferire con le rotte API
+# Supportiamo sia l'accesso alla root che l'accesso tramite la sottocartella /frontend
+app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend_static")
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend_root")
