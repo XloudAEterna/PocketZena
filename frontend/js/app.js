@@ -1,4 +1,4 @@
-const API_BASE = '/api/v1';
+const API_BASE = 'http://192.168.1.113/api/v1';
 let state = {
     nickname: '',
     token: '',
@@ -30,7 +30,7 @@ function showPage(pageId) {
 async function apiPost(endpoint, body, useToken = true) {
     const headers = { 'Content-Type': 'application/json' };
     if (useToken) headers['X-Session-Token'] = state.token;
-
+    
     try {
         const res = await fetch(`${API_BASE}${endpoint}`, {
             method: 'POST',
@@ -162,7 +162,7 @@ function updateUI(status) {
     if (status.status === 'SELECTION' && document.getElementById('lobby-page').offsetParent !== null) {
         showPage('selection-page');
     }
-
+    
     if (status.status === 'BATTLE') {
         if (document.getElementById('battle-page').offsetParent === null) {
             showPage('battle-page');
@@ -171,7 +171,7 @@ function updateUI(status) {
         updateBattleUI(status);
         displayReactions(status.reactions);
     }
-
+    
     if (status.status === 'FINISHED') {
         showPage('result-page');
         document.getElementById('winner-text').innerText = "Vincitore: " + status.winner_nickname;
@@ -181,11 +181,11 @@ function updateUI(status) {
 
 function displayReactions(reactions) {
     if (!reactions || reactions.length === 0) return;
-
+    
     // Le reazioni arrivano ordinate dalla più recente alla meno recente
     // Noi vogliamo mostrare solo quelle con ID > lastShownReactionId
     const newReactions = reactions.filter(r => r.id > state.lastShownReactionId).reverse();
-
+    
     if (newReactions.length > 0) {
         const container = document.getElementById('reactions-display');
         newReactions.forEach(r => {
@@ -195,14 +195,14 @@ function displayReactions(reactions) {
             // Posizione casuale orizzontale per varietà
             span.style.left = Math.random() * 80 + 10 + '%';
             span.style.bottom = '20%';
-
+            
             container.appendChild(span);
-
+            
             // Rimuoviamo l'elemento dopo l'animazione (2s)
             setTimeout(() => {
                 span.remove();
             }, 2000);
-
+            
             state.lastShownReactionId = Math.max(state.lastShownReactionId, r.id);
         });
     }
@@ -210,11 +210,11 @@ function displayReactions(reactions) {
 
 function updateBattleUI(status) {
     state.status = status; // Salviamo lo stato per aggiornamenti manuali (es. cambio tifo)
-
+    
     // Determiniamo chi va sotto (bottom) e chi va sopra (top)
     let bottom, top;
     const isSpectator = state.role === 'SPECTATOR';
-
+    
     if (isSpectator) {
         if (state.cheeringFor === 'P2') {
             bottom = status.player2;
@@ -253,11 +253,11 @@ function updateBattleUI(status) {
     document.getElementById('p2-hp-text').innerText = `${top.active_zenamon_hp}/${top.active_zenamon_max_hp}`;
     document.getElementById('p2-hp-fill').style.width = (top.active_zenamon_hp / top.active_zenamon_max_hp * 100) + '%';
     document.getElementById('p2-zenamon-name').innerText = top.active_zenamon_name;
-
+    
     // Lo Zenamon sotto si vede di spalle, quello sopra di fronte
     document.getElementById('p1-sprite').src = getBackSprite(bottom.active_zenamon_sprite);
     document.getElementById('p2-sprite').src = top.active_zenamon_sprite;
-
+    
     document.getElementById('p1-ready-indicator').classList.toggle('hidden', !bottom.is_ready);
     document.getElementById('p2-ready-indicator').classList.toggle('hidden', !top.is_ready);
 
@@ -265,14 +265,14 @@ function updateBattleUI(status) {
     if (!isSpectator) {
         const me = (status.player1.nickname === state.nickname) ? status.player1 : status.player2;
         const hasSentAction = me.is_ready;
-
+        
         if (hasSentAction) {
             document.getElementById('battle-controls').classList.add('hidden');
             document.getElementById('switch-menu').classList.add('hidden');
             document.getElementById('waiting-turn').classList.remove('hidden');
         } else {
             document.getElementById('waiting-turn').classList.add('hidden');
-
+            
             // Se lo Zenamon attivo è svenuto, obbliga lo switch
             if (bottom.active_zenamon_hp === 0) {
                 document.getElementById('battle-controls').classList.add('hidden');
@@ -306,9 +306,9 @@ document.getElementById('search-btn').onclick = async () => {
     const btn = document.getElementById('search-btn');
     btn.disabled = true;
     btn.innerText = "Cerca...";
-
+    
     const data = await apiGet(`/zenamon/search?name=${query}`);
-
+    
     btn.disabled = false;
     btn.innerText = "Cerca";
 
@@ -388,15 +388,15 @@ function renderMoves(zenamonIndex = null) {
 
     const isP1 = status.player1.nickname === state.nickname;
     const me = isP1 ? status.player1 : status.player2;
-
+    
     let targetZenamon;
     if (zenamonIndex) {
-        const zenamonName = me.team[zenamonIndex - 1].name;
+        const zenamonName = me.team[zenamonIndex-1].name;
         targetZenamon = state.team.find(z => z.name === zenamonName);
     } else {
         targetZenamon = state.team.find(z => z.name === me.active_zenamon_name);
     }
-
+    
     if (targetZenamon && targetZenamon.moves) {
         grid.innerHTML = targetZenamon.moves.map(m => `
             <button class="move-btn" onclick="sendBattleAction('ATTACK', '${m.name}')">
@@ -410,12 +410,12 @@ async function sendBattleAction(type, moveName = null, zenamonIndex = null) {
     const body = { type };
     if (moveName) body.move_name = moveName;
     if (zenamonIndex) body.zenamon_index = zenamonIndex;
-
+    
     // Se abbiamo uno switch in sospeso (es. cambio volontario + mossa o obbligo switch + mossa)
     if (state.pendingSwitchIndex) {
         body.zenamon_index = state.pendingSwitchIndex;
     }
-
+    
     const data = await apiPost(`/duels/${state.duelCode}/action`, body);
     if (data.accepted) {
         state.pendingSwitchIndex = null; // Reset
@@ -479,7 +479,7 @@ document.querySelectorAll('.react-btn').forEach(btn => {
             alert(`Attendi ancora ${remaining} secondi prima di un'altra reazione!`);
             return;
         }
-
+        
         state.lastReactionTime = now;
         const emoji = btn.getAttribute('data-emoji');
         await apiPost(`/duels/${state.duelCode}/reaction`, { emoji });
