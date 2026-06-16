@@ -1,6 +1,4 @@
-const API_BASE = window.location.origin.includes('github.io')
-    ? 'https://sidaryldz.pythonanywhere.com/api/v1'
-    : '/api/v1';
+﻿const API_BASE = '/api/v1';
 let state = {
     nickname: '',
     token: '',
@@ -325,14 +323,6 @@ function updateUI(status) {
     }
 }
 
-async function refreshBattleStatus() {
-    const status = await apiGet(`/duels/${state.duelCode}/status`);
-    if (status.error) return;
-
-    state.status = status;
-    updateUI(status);
-}
-
 function displayReactions(reactions) {
     const container = document.getElementById('reactions-display');
     if (!reactions || reactions.length === 0) return;
@@ -549,7 +539,6 @@ async function sendBattleAction(type, moveName = null, zenamonIndex = null) {
         document.getElementById('battle-controls').classList.add('hidden');
         document.getElementById('switch-menu').classList.add('hidden');
         document.getElementById('waiting-turn').classList.remove('hidden');
-        await refreshBattleStatus();
     } else if (data.error) {
         const msg = data.detail ? (Array.isArray(data.detail) ? data.detail[0].msg : data.detail) : "Azione non valida";
         alert("Errore: " + msg);

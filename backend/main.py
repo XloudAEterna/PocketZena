@@ -262,6 +262,7 @@ async def get_duel_status(code: str, db: Session = Depends(get_db)):
     p1 = db.get(Player, duel.player1_id)
     p2 = db.get(Player, duel.player2_id) if duel.player2_id else None
     
+    # Dati Zenamon Attivi
     def get_team_info(player_id):
         if not player_id:
             return []
@@ -286,15 +287,13 @@ async def get_duel_status(code: str, db: Session = Depends(get_db)):
         return result
 
     def get_active_info(player_id):
-        if not player_id:
-            return None, None, None, None, False
+        if not player_id: return None, None, None, None, False
         active = db.query(DuelZenamon).filter(
-            DuelZenamon.duel_id == duel.id,
+            DuelZenamon.duel_id == duel.id, 
             DuelZenamon.player_id == player_id,
             DuelZenamon.is_active == True
         ).first()
-        if not active:
-            return None, None, None, None, False
+        if not active: return None, None, None, None, False
         z_cache = db.get(ZenamonCache, active.zenamon_id)
         max_hp = json.loads(z_cache.base_stats).get("hp", 100)
         return z_cache.name, active.current_hp, max_hp, z_cache.sprite_url, active.is_fainted
@@ -303,7 +302,8 @@ async def get_duel_status(code: str, db: Session = Depends(get_db)):
     p2_z_name, p2_z_hp, p2_z_max, p2_z_sprite, p2_z_fainted = get_active_info(duel.player2_id)
     p1_team = get_team_info(duel.player1_id)
     p2_team = get_team_info(duel.player2_id)
-
+    
+    # Verifica se i giocatori sono pronti per il turno corrente
     turn = db.query(Turn).filter(Turn.duel_id == duel.id, Turn.turn_number == duel.current_turn).first()
     p1_ready = turn.p1_action is not None if turn else False
     p2_ready = turn.p2_action is not None if turn else False
@@ -357,10 +357,10 @@ async def send_action(code: str, action: BattleAction, current_player: Player = 
     duel = db.query(Duel).filter(Duel.id == code.upper()).first()
     if not duel:
         raise HTTPException(status_code=404, detail="Duello non trovato")
-    
+
     if duel.status != "BATTLE":
         raise HTTPException(status_code=400, detail="Non sei in fase di combattimento")
-    
+
     turn = db.query(Turn).filter(Turn.duel_id == duel.id, Turn.turn_number == duel.current_turn).first()
     if not turn:
         raise HTTPException(status_code=500, detail="Turno non trovato")
@@ -419,9 +419,9 @@ async def send_action(code: str, action: BattleAction, current_player: Player = 
         if turn.p2_action:
             raise HTTPException(status_code=400, detail="Azione gia' inviata per questo turno")
         turn.p2_action = action.model_dump_json()
-    
+
     db.commit()
-    
+
     p1_must_switch = duel.player1_id in forced_switch_players
     p2_must_switch = duel.player2_id in forced_switch_players
     forced_actions_ready = (
@@ -433,8 +433,9 @@ async def send_action(code: str, action: BattleAction, current_player: Player = 
     # In un turno normale servono entrambi. Dopo un KO attivo servono solo gli switch obbligatori.
     if (not forced_switch_players and turn.p1_action and turn.p2_action) or forced_actions_ready:
         resolve_turn(duel, db)
-        
+
     return {"accepted": True}
+
 
 @app.post("/api/v1/duels/{code}/reaction")
 async def send_reaction(code: str, reaction_in: ReactionCreate, current_player: Player = Depends(get_current_player), db: Session = Depends(get_db)):
