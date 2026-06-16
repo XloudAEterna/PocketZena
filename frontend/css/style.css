@@ -82,6 +82,70 @@ body {
 
 h1 { text-align: center; color: var(--secondary); }
 
+.room-page {
+    position: relative;
+    justify-content: center;
+    gap: 16px;
+    background-color: #dce8df;
+    background-image: linear-gradient(rgba(255,255,255,0.18), rgba(255,255,255,0.24)), url('../img/pokewallpaper.jpg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.65);
+}
+
+.room-page h1 {
+    color: white;
+}
+
+.room-page .card,
+.room-page .menu-options,
+.room-page > p {
+    background: rgba(0,0,0,0.38);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 6px;
+    padding: 16px;
+    backdrop-filter: blur(2px);
+}
+
+.room-page .menu-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.room-page .join-option {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.result-page {
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    background-image: linear-gradient(rgba(0,0,0,0.18), rgba(0,0,0,0.45)), url('../img/winnerimg.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    color: white;
+    text-shadow: 0 3px 8px rgba(0,0,0,0.85);
+}
+
+.result-page h1 {
+    color: white;
+    background: rgba(0,0,0,0.42);
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 6px;
+    padding: 14px 18px;
+}
+
+.result-page button {
+    background: rgba(42,117,187,0.92);
+    border: 1px solid rgba(255,255,255,0.5);
+}
+
 button {
     background: var(--secondary);
     color: white;
@@ -103,10 +167,55 @@ input {
     font-size: 16px;
 }
 
+.search-item {
+    background: #f0f0f0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+}
+
+.search-item:hover {
+    background: #e0e0e0;
+}
+
+.search-item img {
+    image-rendering: pixelated;
+}
+
 /* Battle Arena Styles */
 .battle-header, .battle-footer {
     padding: 10px;
     background: #eee;
+}
+
+.audio-toggle {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 5;
+    margin: 0;
+    padding: 6px 10px;
+    background: #333;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.audio-toggle.is-muted {
+    color: white;
+    border-color: #777;
+}
+
+.audio-toggle:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
 }
 
 .hp-bar {
@@ -138,10 +247,69 @@ input {
 .zenamon-sprite-container img {
     width: 150px;
     height: 150px;
+    image-rendering: pixelated;
+    transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 .p2 { align-self: flex-end; text-align: right; }
 .p1 { align-self: flex-start; }
+
+.zenamon-sprite-container.attack-lunge.p1 img {
+    animation: lungeP1 0.45s steps(2, end);
+}
+
+.zenamon-sprite-container.attack-lunge.p2 img {
+    animation: lungeP2 0.45s steps(2, end);
+}
+
+.zenamon-sprite-container.hit-shake img {
+    animation: hitShake 0.42s steps(2, end), damageBlink 0.9s steps(1, end);
+}
+
+.zenamon-sprite-container.faint-out img {
+    animation: faintOut 0.85s ease-in forwards;
+}
+
+.zenamon-sprite-container.is-fainted img {
+    opacity: 0;
+    transform: translateY(24px);
+}
+
+@keyframes lungeP1 {
+    0%, 100% { transform: translate(0, 0); }
+    45% { transform: translate(34px, -10px); }
+}
+
+@keyframes lungeP2 {
+    0%, 100% { transform: translate(0, 0); }
+    45% { transform: translate(-34px, 10px); }
+}
+
+@keyframes hitShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-8px); }
+    80% { transform: translateX(8px); }
+}
+
+@keyframes damageBlink {
+    0%, 100% { opacity: 1; visibility: visible; }
+    10% { opacity: 0; visibility: hidden; }
+    20% { opacity: 1; visibility: visible; }
+    30% { opacity: 0; visibility: hidden; }
+    40% { opacity: 1; visibility: visible; }
+    50% { opacity: 0; visibility: hidden; }
+    60% { opacity: 1; visibility: visible; }
+    70% { opacity: 0; visibility: hidden; }
+    80% { opacity: 1; visibility: visible; }
+}
+
+@keyframes faintOut {
+    0% { opacity: 1; transform: translateY(0); }
+    35% { opacity: 0.9; transform: translateY(4px); }
+    100% { opacity: 0; transform: translateY(34px); }
+}
 
 .log {
     height: 100px;
@@ -196,6 +364,7 @@ input {
     transform: translate(-50%, -50%);
     pointer-events: none;
     font-size: 50px;
+    z-index: 6;
 }
 
 .floating-emoji {
