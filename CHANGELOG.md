@@ -18,6 +18,10 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 
 ### Corretto
 - Risolto errore 500 su PythonAnywhere: implementato il calcolo del percorso assoluto per il database SQLite in `backend/models/database.py`, evitando crash dovuti a directory di lavoro errate.
+- Risolti errori "HARAKIRI" (timeout) su PythonAnywhere:
+    - Aggiunto `busy_timeout` a SQLite per gestire la concorrenza.
+    - Introdotto caching persistente della lista Zenamon in `zenamon_names.json`.
+    - Ottimizzato il recupero dei dati da PokeAPI con timeout stringenti e parallelismo migliorato.
 - Migliorata la robustezza CORS: aggiunto un gestore di eccezioni globale in `backend/main.py` per garantire che anche gli errori 500 restituiscano header CORS validi.
 - Aggiunto logging in `passenger_wsgi.py` per facilitare il debug degli errori di avvio sul server di produzione.
 - Risolto errore CORS nel backend: configurato `allow_credentials=False` per permettere l'uso del wildcard `allow_origins=["*"]`, necessario per le chiamate da domini diversi (es. GitHub Pages).
