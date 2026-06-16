@@ -36,8 +36,8 @@ Il gioco è realizzato utilizzando Python (FastAPI) e vanilla Javascript.
 
 Puoi giocare a **POCKET-ZENA** ai seguenti indirizzi:
 
-🚀 **[Vai al Gioco (PythonAnywhere)](https://xloudaeterna.pythonanywhere.com/)** (Consigliato - Backend & Frontend insieme)
-🌐 **[Vai al Gioco (GitHub Pages)](https://xloudaeterna.github.io/PocketZena/frontend)** (Solo Frontend - Richiede backend attivo)
+🚀 **[Vai al Gioco (PythonAnywhere)](https://sidaryldz.pythonanywhere.com/)** (Consigliato - Backend & Frontend insieme)
+🌐 **[Vai al Gioco (GitHub Pages)](https://sidaryldz.github.io/PocketZena/frontend)** (Solo Frontend - Richiede backend attivo)
 
 ---
 

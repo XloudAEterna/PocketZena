@@ -22,11 +22,11 @@ init_db()
 
 app = FastAPI(title="POCKET-ZENA API")
 
-# Configurazione CORS per sviluppo locale
+# Configurazione CORS per produzione e sviluppo
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

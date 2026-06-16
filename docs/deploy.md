@@ -43,9 +43,9 @@ Il frontend viene distribuito automaticamente tramite GitHub Actions.
    - Sotto **Build and deployment**, imposta la sorgente su **GitHub Actions** (oppure lascia che l'action crei il branch `gh-pages` e seleziona quello).
 2. **Configura l'URL dell'API**:
    - Prima di fare il deploy, apri `frontend/js/app.js`.
-   - Modifica `API_BASE` per puntare al tuo indirizzo PythonAnywhere (es. xloudaeterna):
+   - Modifica `API_BASE` per puntare al tuo indirizzo PythonAnywhere (es. sidaryldz):
      ```javascript
-     const API_BASE = 'https://xloudaeterna.pythonanywhere.com/api/v1';
+     const API_BASE = 'https://sidaryldz.pythonanywhere.com/api/v1';
      ```
 
 ## 3. Pipeline CI/CD
