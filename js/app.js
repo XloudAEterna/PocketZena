@@ -1,4 +1,6 @@
-const API_BASE = 'https://sidaryldz.pythonanywhere.com/api/v1';
+const API_BASE = window.location.origin.includes('github.io') 
+    ? 'https://sidaryldz.pythonanywhere.com/api/v1' 
+    : 'http://192.168.1.113:8000/api/v1';
 let state = {
     nickname: '',
     token: '',
