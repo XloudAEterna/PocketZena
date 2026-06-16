@@ -18,13 +18,20 @@ from backend.schemas.battle import BattleStatusResponse, PlayerBattleStatus, Bat
 from backend.pokeapi_client import get_zenamon_data, search_zenamon_names, get_zenamon_basic_data
 from backend.battle_engine import resolve_turn
 
-# Inizializza il DB all'avvio con gestione errori
-try:
-    init_db()
-except Exception as e:
-    print(f"CRITICAL: Errore inizializzazione database: {e}")
-
 app = FastAPI(title="POCKET-ZENA API")
+
+# Evento di startup per inizializzare il DB in modo asincrono rispetto all'importazione
+@app.on_event("startup")
+async def startup_event():
+    import time
+    start = time.time()
+    print("STARTUP: Inizializzazione database...")
+    try:
+        # init_db() è sincrona ma la eseguiamo qui per non bloccare l'import del modulo
+        init_db()
+        print(f"STARTUP: Database inizializzato in {time.time() - start:.2f} secondi.")
+    except Exception as e:
+        print(f"CRITICAL ERROR durante lo startup: {e}")
 
 # Gestore eccezioni globale per catturare errori 500 e garantire risposte JSON
 @app.exception_handler(Exception)
@@ -390,6 +397,10 @@ async def send_reaction(code: str, reaction_in: ReactionCreate, current_player: 
     db.commit()
     
     return {"success": True}
+
+@app.get("/api/v1/health")
+async def health_check():
+    return {"status": "ok", "service": "POCKET-ZENA API"}
 
 # Monta i file statici del frontend alla fine per non interferire con le rotte API
 # Supportiamo sia l'accesso alla root che l'accesso tramite la sottocartella /frontend

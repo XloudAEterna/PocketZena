@@ -17,6 +17,9 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Manuale di gioco per l'utente finale in `docs/manuale.md`.
 
 ### Corretto
+- Risolto errore 504 Gateway Timeout su PythonAnywhere: spostata l'inizializzazione del database (`init_db`) dall'importazione globale all'evento di startup di FastAPI, velocizzando il caricamento del modulo ed evitando l'HARAKIRI del worker uWSGI.
+- Aggiunto endpoint `/api/v1/health` per il monitoraggio dello stato del servizio.
+- Migliorato il logging dei tempi di caricamento in `passenger_wsgi.py` e `backend/main.py`.
 - Risolto errore 500 su PythonAnywhere: implementato il calcolo del percorso assoluto per il database SQLite in `backend/models/database.py`, evitando crash dovuti a directory di lavoro errate.
 - Risolti errori "HARAKIRI" (timeout) su PythonAnywhere:
     - Aggiunto `busy_timeout` a SQLite per gestire la concorrenza.
