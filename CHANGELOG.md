@@ -57,6 +57,8 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Risolti problemi di sincronizzazione del database nei calcoli di fine duello tramite `db.flush()`.
 
 ### Modificato
+- Configurato l'URL di produzione del backend (`API_BASE`) in `frontend/js/app.js` per puntare a PythonAnywhere.
+- Aggiornato `docs/deploy.md` con l'URL reale del progetto.
 - Aggiornato `requirements.txt` con la dipendenza `a2wsgi`.
 - Aggiornato `README.md` con link alla documentazione e istruzioni per il deploy.
 - Sincronizzato `TASKS.md` con lo stato finale del progetto.
