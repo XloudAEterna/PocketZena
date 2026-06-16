@@ -17,6 +17,15 @@ if path not in sys.path:
 try:
     from a2wsgi import ASGIMiddleware
     from backend.main import app
+    from backend.models.database import init_db
+    
+    # Forza l'inizializzazione del DB per ambienti WSGI dove il lifespan di FastAPI potrebbe non essere triggerato
+    logger.info("Inizializzazione database via WSGI...")
+    init_db()
+    
+    # Evitiamo doppia inizializzazione se il lifespan venisse comunque chiamato
+    os.environ["SKIP_DB_INIT"] = "1"
+    
     # L'oggetto 'application' è quello cercato da PythonAnywhere
     application = ASGIMiddleware(app)
     logger.info(f"Applicazione POCKET-ZENA caricata correttamente in {time.time() - start_load:.2f} secondi.")
