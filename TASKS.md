@@ -39,9 +39,10 @@
 - [x] Risoluzione problemi CORS e configurazione dinamica API
 
 ## 6. Deploy
-- [x] Configurazione della pipeline di CI/CD
-- [x] Deploy del backend sul servizio scelto (Documentato in deploy.md)
-- [x] Deploy del frontend (es. GitHub Pages o Vercel)
+- [x] Configurazione della pipeline di CI
+- [x] Deploy del backend (Documentato in deploy.md)
+- [x] Consolidamento frontend e backend su unico dominio (PythonAnywhere)
+- [x] Disattivazione supporto GitHub Pages
 
 ## 7. Documentazione
 - [x] Aggiornamento README.md con istruzioni di installazione e avvio

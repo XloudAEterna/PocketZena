@@ -36,8 +36,7 @@ Il gioco è realizzato utilizzando Python (FastAPI) e vanilla Javascript.
 
 Puoi giocare a **POCKET-ZENA** ai seguenti indirizzi:
 
-🚀 **[Vai al Gioco (PythonAnywhere)](https://sidaryldz.pythonanywhere.com/)** (Consigliato - Backend & Frontend insieme)
-🌐 **[Vai al Gioco (GitHub Pages)](https://sidaryldz.github.io/PocketZena/frontend)** (Solo Frontend - Richiede backend attivo)
+🚀 **[Vai al Gioco (PythonAnywhere)](https://sidaryldz.pythonanywhere.com/)** (Backend & Frontend insieme)
 
 ---
 
@@ -73,9 +72,8 @@ python -m http.server 8000
 Assicurati di configurare il proxy o l'URL delle API se necessario.
 
 ## CI/CD e Deploy
-Il progetto utilizza **GitHub Actions** per l'integrazione continua e il deploy automatico del frontend.
+Il progetto utilizza **GitHub Actions** per l'integrazione continua.
 - **CI**: Ad ogni push su `main`, vengono eseguiti i test con `pytest`.
-- **Deploy Frontend**: Le modifiche alla cartella `frontend/` vengono pubblicate automaticamente su **GitHub Pages**.
 
 Per istruzioni dettagliate su come pubblicare il backend su **PythonAnywhere**, consulta la [Guida al Deploy](docs/deploy.md).
 
