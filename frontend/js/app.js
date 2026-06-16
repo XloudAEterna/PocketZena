@@ -1,4 +1,4 @@
-const API_BASE = 'https://xloudaeterna.pythonanywhere.com/api/v1';
+const API_BASE = 'https://sidaryldz.pythonanywhere.com/api/v1';
 let state = {
     nickname: '',
     token: '',
