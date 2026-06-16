@@ -34,7 +34,8 @@
 ## 5. Test e Validazione
 - [x] Unit test per la logica di combattimento
 - [x] Test di integrazione per il flusso del duello
-- [x] Bug fixing e rifiniture
+- [x] Bug fixing e rifiniture (inclusa migrazione a FastAPI lifespan handler)
+- [x] Validazione compatibilità con ultime versioni del framework
 
 ## 6. Deploy
 - [x] Configurazione della pipeline di CI/CD

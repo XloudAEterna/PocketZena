@@ -3,6 +3,7 @@ import random
 import string
 import json
 import asyncio
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, Header, status, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,11 +19,9 @@ from backend.schemas.battle import BattleStatusResponse, PlayerBattleStatus, Bat
 from backend.pokeapi_client import get_zenamon_data, search_zenamon_names, get_zenamon_basic_data
 from backend.battle_engine import resolve_turn
 
-app = FastAPI(title="POCKET-ZENA API")
-
-# Evento di startup per inizializzare il DB in modo asincrono rispetto all'importazione
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Evento di startup per inizializzare il DB in modo asincrono rispetto all'importazione
     import time
     start = time.time()
     print("STARTUP: Inizializzazione database...")
@@ -32,6 +31,9 @@ async def startup_event():
         print(f"STARTUP: Database inizializzato in {time.time() - start:.2f} secondi.")
     except Exception as e:
         print(f"CRITICAL ERROR durante lo startup: {e}")
+    yield
+
+app = FastAPI(title="POCKET-ZENA API", lifespan=lifespan)
 
 # Gestore eccezioni globale per catturare errori 500 e garantire risposte JSON
 @app.exception_handler(Exception)
