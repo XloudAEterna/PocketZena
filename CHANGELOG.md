@@ -17,6 +17,7 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Manuale di gioco per l'utente finale in `docs/manuale.md`.
 
 ### Corretto
+- Corretti i permessi della GitHub Action per il deploy del frontend (aggiunto `contents: write`), risolvendo l'errore `exit code 128`.
 - Implementato l'obbligo di switch per lo Zenamon esausto: il giocatore non può attaccare finché non cambia il mostriciattolo attivo.
 - Risolto errore `sqlalchemy.exc.ArgumentError` durante lo switch del mostriciattolo per il secondo giocatore, causato da un'errata precedenza degli operatori nella query del database.
 - Risolto errore `NameError: asyncio` e bug di definizione Pydantic (`Optional`) nell'endpoint di ricerca Zenamon parziale.
