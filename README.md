@@ -32,6 +32,15 @@ I dati dei mostriciattoli sono raccolti tramite l'API https://pokeapi.co/
 
 Il gioco è realizzato utilizzando Python (FastAPI) e vanilla Javascript.
 
+## Gioca Ora
+
+Puoi giocare a **POCKET-ZENA** ai seguenti indirizzi:
+
+🚀 **[Vai al Gioco (PythonAnywhere)](https://xloudaeterna.pythonanywhere.com/)** (Consigliato - Backend & Frontend insieme)
+🌐 **[Vai al Gioco (GitHub Pages)](https://xloudaeterna.github.io/PocketZena/)** (Solo Frontend - Richiede backend attivo)
+
+---
+
 ## Installazione e Avvio
 
 ### Prerequisiti
