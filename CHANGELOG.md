@@ -17,11 +17,7 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Manuale di gioco per l'utente finale in `docs/manuale.md`.
 
 ### Corretto
-- Risolto problema di mancata creazione del database in ambienti WSGI: forzata l'inizializzazione del database in `passenger_wsgi.py` per garantire la presenza delle tabelle anche quando il lifespan di FastAPI non viene triggerato dal server di produzione.
-- Migliorata la robustezza del sistema di startup: aggiunto il supporto alla variabile d'ambiente `SKIP_DB_INIT` per evitare doppie inizializzazioni tra WSGI e ASGI.
-- Risolto un bug critico di concorrenza nel backend: rimosso l'uso di `asyncio.gather` con sessioni SQLAlchemy condivise in `search_zenamon` e `set_team`, sostituendolo con un'esecuzione seriale sicura.
-- Ottimizzata la gestione dei file statici: implementato l'uso di percorsi assoluti per il mount della directory `frontend`, garantendo il corretto caricamento dell'interfaccia su PythonAnywhere indipendentemente dalla directory di lavoro.
-- Aggiunto l'import mancante di `os` in `backend/main.py`.
+- Risolto errore CORS e configurazione dinamica API: implementato il rilevamento automatico dell'URL backend in `frontend/js/app.js` (usando percorsi relativi quando possibile) per garantire il corretto funzionamento sia in locale che in produzione.
 - Risolto errore 504 Gateway Timeout su PythonAnywhere: migrata l'inizializzazione del database (`init_db`) al gestore di eventi `lifespan` di FastAPI (sostituendo il deprecato `@app.on_event("startup")`), garantendo un avvio più robusto e conforme alle ultime versioni del framework.
 - Aggiunto endpoint `/api/v1/health` per il monitoraggio dello stato del servizio.
 - Migliorato il logging dei tempi di caricamento in `passenger_wsgi.py` e `backend/main.py`.
