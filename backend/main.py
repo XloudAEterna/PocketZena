@@ -3,6 +3,7 @@ import random
 import string
 import json
 import asyncio
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, Header, status, Request
 from fastapi.responses import JSONResponse
@@ -11,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from backend.models.database import SessionLocal, engine, Base, Player, Duel, ZenamonCache, DuelZenamon, Turn, Reaction, init_db
+from backend.models.database import SessionLocal, engine, Base, Player, Duel, ZenamonCache, DuelZenamon, Turn, Reaction, init_db, BASE_DIR
 from backend.schemas.player import PlayerCreate, PlayerResponse
 from backend.schemas.duel import DuelCreateResponse, DuelJoinResponse, DuelSpectateResponse
 from backend.schemas.zenamon import ZenamonResponse, TeamCreate, ZenamonSearchResult
@@ -22,15 +23,16 @@ from backend.battle_engine import resolve_turn
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Evento di startup per inizializzare il DB in modo asincrono rispetto all'importazione
+    # Utile per ambienti ASGI (come uvicorn locale)
     import time
     start = time.time()
-    print("STARTUP: Inizializzazione database...")
-    try:
-        # init_db() è sincrona ma la eseguiamo qui per non bloccare l'import del modulo
-        init_db()
-        print(f"STARTUP: Database inizializzato in {time.time() - start:.2f} secondi.")
-    except Exception as e:
-        print(f"CRITICAL ERROR durante lo startup: {e}")
+    if os.environ.get("SKIP_DB_INIT") != "1":
+        print("STARTUP: Inizializzazione database via Lifespan...")
+        try:
+            init_db()
+            print(f"STARTUP: Database inizializzato in {time.time() - start:.2f} secondi.")
+        except Exception as e:
+            print(f"CRITICAL ERROR durante lo startup: {e}")
     yield
 
 app = FastAPI(title="POCKET-ZENA API", lifespan=lifespan)
@@ -160,9 +162,11 @@ async def search_zenamon(name: str, db: Session = Depends(get_db)):
     if not names:
         return {"results": []}
     
-    # Carichiamo i dati base per tutti i nomi trovati
-    tasks = [get_zenamon_basic_data(n, db) for n in names]
-    results = await asyncio.gather(*tasks)
+    # Carichiamo i dati base per tutti i nomi trovati in sequenza (per sicurezza della sessione DB)
+    results = []
+    for n in names:
+        res = await get_zenamon_basic_data(n, db)
+        results.append(res)
     
     formatted_results = []
     for r in results:
@@ -209,9 +213,9 @@ async def set_team(code: str, team_in: TeamCreate, current_player: Player = Depe
     if existing_team:
         raise HTTPException(status_code=400, detail="Squadra già inviata")
     
-    # 1. Assicuriamoci che tutti gli Zenamon siano in cache (caricamento parallelo)
-    fetch_tasks = [get_zenamon_data(str(z_id), db) for z_id in team_in.zenamon_ids]
-    await asyncio.gather(*fetch_tasks)
+    # 1. Assicuriamoci che tutti gli Zenamon siano in cache (caricamento seriale per sicurezza sessione DB)
+    for z_id in team_in.zenamon_ids:
+        await get_zenamon_data(str(z_id), db)
     
     # 2. Ora procediamo con l'aggiunta alla squadra nel duello
     for i, z_id in enumerate(team_in.zenamon_ids):
@@ -405,6 +409,7 @@ async def health_check():
     return {"status": "ok", "service": "POCKET-ZENA API"}
 
 # Monta i file statici del frontend alla fine per non interferire con le rotte API
-# Supportiamo sia l'accesso alla root che l'accesso tramite la sottocartella /frontend
-app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend_static")
-app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend_root")
+# Usiamo percorsi assoluti per robustezza su PythonAnywhere
+frontend_path = os.path.join(BASE_DIR, "frontend")
+app.mount("/frontend", StaticFiles(directory=frontend_path, html=True), name="frontend_static")
+app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend_root")
