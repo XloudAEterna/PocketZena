@@ -36,6 +36,7 @@
 - [x] Test di integrazione per il flusso del duello
 - [x] Bug fixing e rifiniture (inclusa migrazione a FastAPI lifespan handler)
 - [x] Validazione compatibilità con ultime versioni del framework
+- [x] Risoluzione problemi CORS e configurazione dinamica API
 
 ## 6. Deploy
 - [x] Configurazione della pipeline di CI/CD

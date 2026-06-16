@@ -17,6 +17,7 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Manuale di gioco per l'utente finale in `docs/manuale.md`.
 
 ### Corretto
+- Risolto errore CORS e configurazione dinamica API: implementato il rilevamento automatico dell'URL backend in `frontend/js/app.js` (usando percorsi relativi quando possibile) per garantire il corretto funzionamento sia in locale che in produzione.
 - Risolto errore 504 Gateway Timeout su PythonAnywhere: migrata l'inizializzazione del database (`init_db`) al gestore di eventi `lifespan` di FastAPI (sostituendo il deprecato `@app.on_event("startup")`), garantendo un avvio più robusto e conforme alle ultime versioni del framework.
 - Aggiunto endpoint `/api/v1/health` per il monitoraggio dello stato del servizio.
 - Migliorato il logging dei tempi di caricamento in `passenger_wsgi.py` e `backend/main.py`.
