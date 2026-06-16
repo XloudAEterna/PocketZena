@@ -200,15 +200,16 @@ async def set_team(code: str, team_in: TeamCreate, current_player: Player = Depe
     if existing_team:
         raise HTTPException(status_code=400, detail="Squadra già inviata")
     
+    # 1. Assicuriamoci che tutti gli Zenamon siano in cache (caricamento parallelo)
+    fetch_tasks = [get_zenamon_data(str(z_id), db) for z_id in team_in.zenamon_ids]
+    await asyncio.gather(*fetch_tasks)
+    
+    # 2. Ora procediamo con l'aggiunta alla squadra nel duello
     for i, z_id in enumerate(team_in.zenamon_ids):
-        # Assicuriamoci che lo Zenamon sia in cache
         z_cache = db.query(ZenamonCache).filter(ZenamonCache.id == z_id).first()
         if not z_cache:
-            # Proviamo a recuperarlo se non c'è (potrebbe capitare se il client manda un ID a caso)
-            z_data = await get_zenamon_data(str(z_id), db)
-            if not z_data:
-                raise HTTPException(status_code=404, detail=f"Zenamon con ID {z_id} non trovato")
-            z_cache = db.query(ZenamonCache).filter(ZenamonCache.id == z_id).first()
+            # Non dovrebbe succedere dopo il gather sopra, ma per sicurezza:
+            raise HTTPException(status_code=404, detail=f"Zenamon con ID {z_id} non trovato")
 
         stats = json.loads(z_cache.base_stats)
         hp = stats.get("hp", 100) # Fallback

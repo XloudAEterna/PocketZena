@@ -1,8 +1,9 @@
 import httpx
 import json
 import asyncio
+import os
 from sqlalchemy.orm import Session
-from .models.database import ZenamonCache
+from .models.database import ZenamonCache, BASE_DIR
 from sqlalchemy import or_
 
 POKEAPI_BASE_URL = "https://pokeapi.co/api/v2"
@@ -16,17 +17,37 @@ async def _get_all_names():
     if _ZENAMON_NAMES_CACHE:
         return _ZENAMON_NAMES_CACHE
     
+    cache_file = os.path.join(BASE_DIR, "zenamon_names.json")
+    
     async with _CACHE_LOCK:
         if _ZENAMON_NAMES_CACHE:
             return _ZENAMON_NAMES_CACHE
         
-        async with httpx.AsyncClient() as client:
+        # 1. Prova a leggere da file
+        if os.path.exists(cache_file):
+            try:
+                with open(cache_file, 'r') as f:
+                    _ZENAMON_NAMES_CACHE = json.load(f)
+                    if _ZENAMON_NAMES_CACHE:
+                        return _ZENAMON_NAMES_CACHE
+            except:
+                pass
+        
+        # 2. Se non c'è file o è vuoto, chiama PokeAPI
+        async with httpx.AsyncClient(timeout=10.0) as client:
             try:
                 # Recuperiamo tutti i nomi (circa 1300 attualmente)
                 response = await client.get(f"{POKEAPI_BASE_URL}/pokemon?limit=2000")
                 if response.status_code == 200:
                     data = response.json()
                     _ZENAMON_NAMES_CACHE = [r["name"] for r in data["results"]]
+                    
+                    # Salva su file per i prossimi riavvii/altri worker
+                    try:
+                        with open(cache_file, 'w') as f:
+                            json.dump(_ZENAMON_NAMES_CACHE, f)
+                    except:
+                        pass
             except Exception as e:
                 print(f"Errore nel recupero della lista nomi da PokeAPI: {e}")
     
@@ -59,7 +80,7 @@ async def get_zenamon_basic_data(name: str, db: Session):
         }
     
     # Se non in cache, recuperiamo solo i dati base da PokeAPI
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=5.0) as client:
         try:
             response = await client.get(f"{POKEAPI_BASE_URL}/pokemon/{name}")
             if response.status_code == 200:
@@ -126,8 +147,8 @@ async def get_zenamon_data(zenamon_name_or_id: str, db: Session):
         }
 
     # 2. Se non in cache, chiama PokeAPI
-    # Usiamo un timeout più lungo per il recupero delle mosse
-    async with httpx.AsyncClient(timeout=20.0) as client:
+    # Usiamo un timeout ragionevole per il recupero delle mosse
+    async with httpx.AsyncClient(timeout=15.0) as client:
         try:
             response = await client.get(f"{POKEAPI_BASE_URL}/pokemon/{zenamon_name_or_id}")
             if response.status_code != 200:
@@ -143,16 +164,13 @@ async def get_zenamon_data(zenamon_name_or_id: str, db: Session):
             stats = {s["stat"]["name"]: s["base_stat"] for s in data["stats"]}
             
             # Recupero delle prime 4 mosse che hanno potenza
-            # Ottimizzazione: cerchiamo di recuperare le mosse in parallelo o limitiamo la ricerca
             moves = []
             possible_moves = data["moves"]
             
-            # Filtriamo le mosse per cercare quelle che probabilmente hanno potenza (evitando troppe chiamate)
-            # Spesso le prime mosse sono di stato.
-            
             async def get_move_details(m_url):
                 try:
-                    m_res = await client.get(m_url)
+                    # Timeout breve per le singole mosse per non bloccare tutto
+                    m_res = await client.get(m_url, timeout=3.0)
                     if m_res.status_code == 200:
                         m_data = m_res.json()
                         if m_data.get("power"):
@@ -166,15 +184,16 @@ async def get_zenamon_data(zenamon_name_or_id: str, db: Session):
                     pass
                 return None
 
-            # Proviamo a controllare le prime 20 mosse per trovarne 4 con potenza
+            # Proviamo a controllare le prime 10 mosse (invece di 20) per trovarne 4 con potenza
+            # Questo riduce il carico e la probabilità di timeout HARAKIRI
             tasks = []
-            for m in possible_moves[:20]:
+            for m in possible_moves[:10]:
                 tasks.append(get_move_details(m["move"]["url"]))
             
             results = await asyncio.gather(*tasks)
             moves = [r for r in results if r is not None][:4]
             
-            # Se ha meno di 4 mosse con potenza, ne prendiamo alcune anche senza potenza per riempire
+            # Se ha meno di 4 mosse con potenza, ne prendiamo alcune anche senza potenza
             if len(moves) < 4:
                 for m in possible_moves:
                     if len(moves) >= 4: break
