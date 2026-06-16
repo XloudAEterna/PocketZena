@@ -3,7 +3,8 @@ import random
 import string
 import json
 import asyncio
-from fastapi import FastAPI, Depends, HTTPException, Header, status
+from fastapi import FastAPI, Depends, HTTPException, Header, status, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
@@ -17,18 +18,31 @@ from backend.schemas.battle import BattleStatusResponse, PlayerBattleStatus, Bat
 from backend.pokeapi_client import get_zenamon_data, search_zenamon_names, get_zenamon_basic_data
 from backend.battle_engine import resolve_turn
 
-# Inizializza il DB all'avvio
-init_db()
+# Inizializza il DB all'avvio con gestione errori
+try:
+    init_db()
+except Exception as e:
+    print(f"CRITICAL: Errore inizializzazione database: {e}")
 
 app = FastAPI(title="POCKET-ZENA API")
 
-# Configurazione CORS per produzione e sviluppo
+# Gestore eccezioni globale per catturare errori 500 e garantire risposte JSON
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    print(f"GLOBAL ERROR: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Errore interno del server", "message": str(exc)},
+    )
+
+# Configurazione CORS ottimizzata per produzione
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Dependency per il database

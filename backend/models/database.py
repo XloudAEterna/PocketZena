@@ -1,8 +1,13 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, ForeignKey, Text
 from sqlalchemy.orm import sessionmaker, declarative_base
 import datetime
+import os
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./pocket_zena.sqlite3"
+# Calcola il percorso assoluto della cartella principale del progetto
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+DB_PATH = os.path.join(BASE_DIR, "pocket_zena.sqlite3")
+
+SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}

@@ -17,6 +17,9 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Manuale di gioco per l'utente finale in `docs/manuale.md`.
 
 ### Corretto
+- Risolto errore 500 su PythonAnywhere: implementato il calcolo del percorso assoluto per il database SQLite in `backend/models/database.py`, evitando crash dovuti a directory di lavoro errate.
+- Migliorata la robustezza CORS: aggiunto un gestore di eccezioni globale in `backend/main.py` per garantire che anche gli errori 500 restituiscano header CORS validi.
+- Aggiunto logging in `passenger_wsgi.py` per facilitare il debug degli errori di avvio sul server di produzione.
 - Risolto errore CORS nel backend: configurato `allow_credentials=False` per permettere l'uso del wildcard `allow_origins=["*"]`, necessario per le chiamate da domini diversi (es. GitHub Pages).
 - Corretti i permessi della GitHub Action per il deploy del frontend (aggiunto `contents: write`), risolvendo l'errore `exit code 128`.
 - Implementato l'obbligo di switch per lo Zenamon esausto: il giocatore non può attaccare finché non cambia il mostriciattolo attivo.
