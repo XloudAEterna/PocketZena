@@ -424,6 +424,14 @@ async def send_action(code: str, action: BattleAction, current_player: Player = 
         if target.is_fainted:
             raise HTTPException(status_code=400, detail="Questo Zenamon e' esausto")
 
+        if current_player.id not in forced_switch_players:
+            if not action.move_name:
+                raise HTTPException(status_code=400, detail="Devi scegliere una mossa per il nuovo Zenamon")
+            z_cache = db.get(ZenamonCache, target.zenamon_id)
+            moves = json.loads(z_cache.moves) if z_cache and z_cache.moves else []
+            if not any(m["name"] == action.move_name for m in moves):
+                raise HTTPException(status_code=400, detail=f"Mossa {action.move_name} non valida per {z_cache.name}")
+
     if current_player.id == duel.player1_id:
         if turn.p1_action:
             raise HTTPException(status_code=400, detail="Azione gia' inviata per questo turno")
