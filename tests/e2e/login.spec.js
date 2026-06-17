@@ -10,15 +10,22 @@ test.describe('Login', () => {
     await expect(page.locator('#user-nickname')).toHaveText(nick);
   });
 
-  test('nickname con meno di 3 caratteri mostra un alert', async ({ page }) => {
+  test('nickname con lunghezza diversa da 3 caratteri mostra un alert', async ({ page }) => {
     await page.goto('/');
 
-    const dialogPromise = page.waitForEvent('dialog');
+    // Troppo corto (2 caratteri)
+    let dialogPromise = page.waitForEvent('dialog');
     await page.fill('#nickname-input', 'AB');
-    // Non await-are: click blocca in attesa che la dialog venga gestita
     page.click('#login-btn');
+    let dialog = await dialogPromise;
+    expect(dialog.message()).toContain('3 caratteri');
+    await dialog.dismiss();
 
-    const dialog = await dialogPromise;
+    // Troppo lungo (4 caratteri) — nuova validazione: length !== 3
+    dialogPromise = page.waitForEvent('dialog');
+    await page.fill('#nickname-input', 'ABCD');
+    page.click('#login-btn');
+    dialog = await dialogPromise;
     expect(dialog.message()).toContain('3 caratteri');
     await dialog.dismiss();
 
