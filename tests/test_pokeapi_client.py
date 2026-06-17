@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from backend.models.database import Base, ZenamonCache
-from backend.pokeapi_client import get_zenamon_data
+from backend.pokeapi_client import get_zenamon_basic_data, get_zenamon_data
 import httpx
 
 # Setup database in memoria per i test
@@ -124,6 +124,50 @@ async def test_get_zenamon_data_by_id(db_session):
         assert result is not None
         assert result["id"] == 4
         assert result["name"] == "charmander"
+
+@pytest.mark.asyncio
+async def test_get_zenamon_basic_data_by_id_from_cache(db_session):
+    """Test che verifica la ricerca base tramite ID numerico dalla cache."""
+    new_zenamon = ZenamonCache(
+        id=25,
+        name="pikachu",
+        sprite_url="http://example.com/p.png",
+        types=json.dumps(["electric"]),
+        base_stats=json.dumps({"hp": 35})
+    )
+    db_session.add(new_zenamon)
+    db_session.commit()
+
+    with patch("httpx.AsyncClient.get") as mock_get:
+        result = await get_zenamon_basic_data("25", db_session)
+
+        assert result["id"] == 25
+        assert result["name"] == "pikachu"
+        assert "electric" in result["types"]
+        mock_get.assert_not_called()
+
+@pytest.mark.asyncio
+async def test_get_zenamon_basic_data_by_id_from_api(db_session):
+    """Test che verifica la ricerca base tramite ID numerico da PokeAPI."""
+    mock_data = {
+        "id": 7,
+        "name": "squirtle",
+        "sprites": {"front_default": "http://example.com/s.png"},
+        "types": [{"type": {"name": "water"}}],
+    }
+
+    with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock_get:
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = mock_data
+        mock_get.return_value = mock_response
+
+        result = await get_zenamon_basic_data("7", db_session)
+
+        assert result["id"] == 7
+        assert result["name"] == "squirtle"
+        assert "water" in result["types"]
+        mock_get.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_get_zenamon_data_api_error(db_session):
