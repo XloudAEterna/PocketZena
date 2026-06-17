@@ -34,6 +34,7 @@ class BattleStatusResponse(BaseModel):
     player2: PlayerBattleStatus
     new_events: List[str]
     reactions: List[ReactionStatus]
+    winner_id: Optional[int] = None
     winner_nickname: Optional[str] = None
 
 

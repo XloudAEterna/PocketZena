@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from backend.main import app, get_db
-from backend.models.database import Base, ZenamonCache, DuelZenamon
+from backend.models.database import Base, ZenamonCache, DuelZenamon, Duel
 import json
 
 # Setup database per i test
@@ -110,6 +110,28 @@ def test_switch_action(client):
     # 3. Verifica Switch
     status = client.get(f"/api/v1/duels/{code}/status").json()
     assert status["player1"]["active_zenamon_name"] == "charmander"
+
+def test_duel_status_includes_winner_identity(client):
+    p1 = client.post("/api/v1/players", json={"nickname": "AAA"}).json()
+    p2 = client.post("/api/v1/players", json={"nickname": "BBB"}).json()
+    token1, token2 = p1["token"], p2["token"]
+    duel = client.post("/api/v1/duels", headers={"X-Session-Token": token1}).json()
+    code = duel["duel_code"]
+    client.post(f"/api/v1/duels/{code}/join", headers={"X-Session-Token": token2})
+
+    db = TestingSessionLocal()
+    try:
+        finished_duel = db.get(Duel, code)
+        finished_duel.status = "FINISHED"
+        finished_duel.winner_id = p1["id"]
+        db.commit()
+    finally:
+        db.close()
+
+    status = client.get(f"/api/v1/duels/{code}/status").json()
+    assert status["status"] == "FINISHED"
+    assert status["winner_id"] == p1["id"]
+    assert status["winner_nickname"] == "AAA"
 
 def test_fainted_active_forces_immediate_switch(client):
     p1 = client.post("/api/v1/players", json={"nickname": "AAA"}).json()
