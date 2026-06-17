@@ -100,7 +100,7 @@ def test_switch_action(client):
     # 2. Switch P1 (cambia Bulbasaur con Charmander - posizione 2)
     client.post(f"/api/v1/duels/{code}/action", 
                 headers={"X-Session-Token": token1},
-                json={"type": "SWITCH", "zenamon_index": 2})
+                json={"type": "SWITCH", "zenamon_index": 2, "move_name": "tackle"})
     
     # P2 attacca
     client.post(f"/api/v1/duels/{code}/action", 

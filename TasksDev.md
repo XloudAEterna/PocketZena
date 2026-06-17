@@ -15,6 +15,7 @@ Queste note servono per prendere appunti generici da integrare in modo migliore 
 [ ] animazione entrata in campo dei mostriciattoli 
 
 ## BUG
-[ ] CAMBIO: Quando viene SCELTO un cambio nella fase 1 del turno, viene saltata la scelta delle mosse del nuovo mostriciattolo
+[x] CAMBIO: Quando viene SCELTO un cambio nella fase 1 del turno, viene saltata la scelta delle mosse del nuovo mostriciattolo
 [ ] CAMBIO: Quando viene FATTO un cambio nella fase 2 (fase scontro) del turno, il mostriciattolo nuovo in campo non subisce danni. SUGGERIMENTO: Dividere la fase 2 in 2 sottofasi dove nella prima vengono effettuati i cambi se ci sono e nella seconda i mostriciattoli in campo si scontrano
+[ ] FINE DUELLO: Il duello, indipendetemente da chi ha vinto, da a entrambi i giocatori la schermata "vincitore"
 

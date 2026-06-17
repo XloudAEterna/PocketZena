@@ -1,4 +1,4 @@
-﻿const API_BASE = '/api/v1';
+const API_BASE = '/api/v1';
 let state = {
     nickname: '',
     token: '',
@@ -14,7 +14,8 @@ let state = {
     shownReactionIds: new Set(),
     faintingSprites: new Set(),
     faintedSprites: new Set(),
-    resultDelayTimer: null
+    resultDelayTimer: null,
+    selectedSwitchIndex: null
 };
 
 function getBackSprite(url) {
@@ -384,6 +385,7 @@ function updateBattleUI(status) {
 
     if (me.active_zenamon_name !== state.lastActiveZenamonName) {
         state.lastActiveZenamonName = me.active_zenamon_name;
+        state.selectedSwitchIndex = null;
         renderMoves();
     }
 
@@ -516,13 +518,26 @@ function renderMoves() {
     // Trova lo Zenamon attivo in squadra
     const status = state.status;
     const isP1 = status.player1.nickname === state.nickname;
-    const myActiveName = isP1 ? status.player1.active_zenamon_name : status.player2.active_zenamon_name;
+    let myActiveName = isP1 ? status.player1.active_zenamon_name : status.player2.active_zenamon_name;
     
+    const switchBtn = document.getElementById('show-switch-btn');
+    if (state.selectedSwitchIndex) {
+        if (switchBtn) switchBtn.innerText = 'Annulla Cambio';
+        const me = isP1 ? status.player1 : status.player2;
+        const serverTeam = me.team || [];
+        const chosenZenamon = serverTeam.find(z => z.position === state.selectedSwitchIndex);
+        if (chosenZenamon) {
+            myActiveName = chosenZenamon.name;
+        }
+    } else {
+        if (switchBtn) switchBtn.innerText = 'Cambia';
+    }
+
     // Recuperiamo le mosse dallo stato (le abbiamo salvate quando abbiamo cercato gli Zenamon)
     const myZenamon = state.team.find(z => z.name === myActiveName);
     if (myZenamon && myZenamon.moves) {
         grid.innerHTML = myZenamon.moves.map(m => `
-            <button class="move-btn" onclick="sendBattleAction('ATTACK', '${m.name}')">
+            <button class="move-btn" onclick="executeBattleAction('${m.name}')">
                 ${m.name}<br><small>${m.type} (${m.power})</small>
             </button>
         `).join('');
@@ -546,11 +561,16 @@ async function sendBattleAction(type, moveName = null, zenamonIndex = null) {
 }
 
 document.getElementById('show-switch-btn').onclick = () => {
-    document.getElementById('battle-controls').classList.add('hidden');
-    const switchMenu = document.getElementById('switch-menu');
-    switchMenu.dataset.open = 'true';
-    switchMenu.classList.remove('hidden');
-    renderSwitchList(false);
+    if (state.selectedSwitchIndex) {
+        state.selectedSwitchIndex = null;
+        renderMoves();
+    } else {
+        document.getElementById('battle-controls').classList.add('hidden');
+        const switchMenu = document.getElementById('switch-menu');
+        switchMenu.dataset.open = 'true';
+        switchMenu.classList.remove('hidden');
+        renderSwitchList(false);
+    }
 };
 
 document.getElementById('back-to-moves-btn').onclick = () => {
@@ -558,6 +578,8 @@ document.getElementById('back-to-moves-btn').onclick = () => {
     switchMenu.dataset.open = 'false';
     switchMenu.classList.add('hidden');
     document.getElementById('battle-controls').classList.remove('hidden');
+    state.selectedSwitchIndex = null;
+    renderMoves();
 };
 
 function renderSwitchList(isForced = false) {
@@ -581,21 +603,40 @@ function renderSwitchList(isForced = false) {
         const disabled = isCurrent || isFainted;
         const label = isCurrent ? '(In campo)' : (isFainted ? '(Esausto)' : '');
         return `
-            <button class="switch-btn" ${disabled ? 'disabled' : ''} onclick="confirmSwitch(${z.position})">
+            <button class="switch-btn" ${disabled ? 'disabled' : ''} onclick="confirmSwitch(${z.position}, ${isForced})">
                 ${z.name.toUpperCase()} ${label}
             </button>
         `;
     }).join('');
 }
 
-async function confirmSwitch(index) {
-    await sendBattleAction('SWITCH', null, index);
-    document.getElementById('switch-menu').dataset.open = 'false';
-    document.getElementById('switch-menu').classList.add('hidden');
+async function confirmSwitch(index, isForced = false) {
+    if (isForced) {
+        await sendBattleAction('SWITCH', null, index);
+        document.getElementById('switch-menu').dataset.open = 'false';
+        document.getElementById('switch-menu').classList.add('hidden');
+    } else {
+        state.selectedSwitchIndex = index;
+        document.getElementById('switch-menu').dataset.open = 'false';
+        document.getElementById('switch-menu').classList.add('hidden');
+        document.getElementById('battle-controls').classList.remove('hidden');
+        renderMoves();
+    }
+}
+
+async function executeBattleAction(moveName) {
+    if (state.selectedSwitchIndex) {
+        const index = state.selectedSwitchIndex;
+        state.selectedSwitchIndex = null;
+        await sendBattleAction('SWITCH', moveName, index);
+    } else {
+        await sendBattleAction('ATTACK', moveName);
+    }
 }
 
 window.confirmSwitch = confirmSwitch;
 window.sendBattleAction = sendBattleAction; // Rendi globale per onclick
+window.executeBattleAction = executeBattleAction;
 
 document.getElementById('music-toggle-btn').onclick = () => {
     if (!state.musicMuted && !state.musicStarted) {
