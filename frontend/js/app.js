@@ -461,7 +461,7 @@ document.getElementById('search-btn').onclick = async () => {
                 <img src="${z.sprite || ''}" alt="${z.name}" style="width: 50px;">
                 <span>${z.name.toUpperCase()}</span>
             `;
-            div.onclick = () => selectZenamon(z.name);
+            div.onclick = () => addZenamonDirectly(z.name);
             resultsList.appendChild(div);
         });
     } else {
@@ -482,6 +482,33 @@ async function selectZenamon(nameOrId) {
     } else {
         alert("Errore nel recupero dei dettagli.");
     }
+}
+
+async function addZenamonDirectly(nameOrId) {
+
+    const data = await apiGet(
+        `/zenamon/${encodeURIComponent(nameOrId)}`
+    );
+
+    if (!data.id) {
+        alert("Errore nel recupero dei dettagli.");
+        return;
+    }
+
+    if (state.team.length >= 3) {
+        return;
+    }
+
+    const alreadyPresent =
+        state.team.find(z => z.id === data.id);
+
+    if (alreadyPresent) {
+        return;
+    }
+
+    state.team.push(data);
+
+    updateTeamUI();
 }
 
 document.getElementById('add-to-team-btn').onclick = () => {
