@@ -1,5 +1,6 @@
 const API_BASE = '/api/v1';
 let state = {
+    playerId: null,
     nickname: '',
     token: '',
     duelCode: '',
@@ -216,6 +217,7 @@ document.getElementById('login-btn').onclick = async () => {
     }
     const data = await apiPost('/players', { nickname: nick }, false);
     if (data.token) {
+        state.playerId = data.id;
         state.nickname = data.nickname;
         state.token = data.token;
         document.getElementById('user-nickname').innerText = state.nickname;
@@ -317,11 +319,20 @@ function updateUI(status) {
         if (!state.resultDelayTimer) {
             state.resultDelayTimer = setTimeout(() => {
                 showPage('result-page');
-                document.getElementById('winner-text').innerText = "Vincitore: " + status.winner_nickname;
+                document.getElementById('winner-text').innerText = getResultMessage(status);
                 state.resultDelayTimer = null;
             }, 2400);
         }
     }
+}
+
+function getResultMessage(status) {
+    const winnerName = status.winner_nickname || 'Giocatore';
+    if (state.role === 'PLAYER' && status.winner_id !== state.playerId) {
+        return `${state.nickname} hai perso!`;
+    }
+
+    return `${winnerName} ha vinto!`;
 }
 
 function displayReactions(reactions) {
