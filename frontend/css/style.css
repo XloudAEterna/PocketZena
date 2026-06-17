@@ -66,6 +66,50 @@ body {
     animation: pulse-red 0.5s ease-in-out 4; /* 2 secondi totali */
 }
 
+@keyframes slideInFromLeft {
+    0% { opacity: 0; transform: translateX(-120%) scale(0.95); }
+    60% { opacity: 1; transform: translateX(8px) scale(1.02); }
+    100% { transform: translateX(0) scale(1); }
+}
+
+@keyframes slideInFromRight {
+    0% { opacity: 0; transform: translateX(120%) scale(0.95); }
+    60% { opacity: 1; transform: translateX(-8px) scale(1.02); }
+    100% { transform: translateX(0) scale(1); }
+}
+
+@keyframes slideInFromBottom {
+    0% { opacity: 0; transform: translateY(120%) scale(0.95); }
+    60% { opacity: 1; transform: translateY(-8px) scale(1.02); }
+    100% { transform: translateY(0) scale(1); }
+}
+
+.entry-from-left {
+    animation: slideInFromLeft 0.6s ease-out both;
+}
+
+.entry-from-right {
+    animation: slideInFromRight 0.6s ease-out both;
+}
+
+.entry-from-bottom {
+    animation: slideInFromBottom 0.6s ease-out both;
+}
+
+.zenamon-sprite-container.animate-entry.p1 {
+    animation: slideInFromLeft 0.65s ease-out both;
+}
+
+.zenamon-sprite-container.animate-entry.p2 {
+    animation: slideInFromRight 0.65s ease-out both;
+}
+
+.search-item.animate-entry,
+.team-item.animate-entry,
+#search-result.animate-entry {
+    animation: slideInFromBottom 0.5s ease-out both;
+}
+
 /* Reazioni */
 .reaction-emoji {
     position: absolute;

@@ -9,6 +9,8 @@ let state = {
     pollingInterval: null,
     lastAnimatedEvents: '',
     lastActiveZenamonName: '',
+    lastP1Sprite: null,
+    lastP2Sprite: null,
     musicMuted: false,
     musicStarted: false,
     shownReactionIds: new Set(),
@@ -36,6 +38,16 @@ function restartSpriteAnimation(side, className) {
     void container.offsetWidth;
     container.classList.add(className);
     window.setTimeout(() => container.classList.remove(className), 700);
+}
+
+function animateEntry(element, direction = 'bottom') {
+    if (!element) return;
+    element.classList.remove('entry-from-left', 'entry-from-right', 'entry-from-bottom', 'animate-entry');
+    void element.offsetWidth;
+    element.classList.add('animate-entry', `entry-from-${direction}`);
+    element.addEventListener('animationend', () => {
+        element.classList.remove('animate-entry', 'entry-from-left', 'entry-from-right', 'entry-from-bottom');
+    }, { once: true });
 }
 
 function playFaintAnimation(side) {
@@ -359,8 +371,20 @@ function updateBattleUI(status) {
     document.getElementById('p2-zenamon-name').innerText = opp.active_zenamon_name || '???';
 
     const isSpectator = state.role === 'SPECTATOR';
-    document.getElementById('p1-sprite').src = isSpectator ? me.active_zenamon_sprite : getBackSprite(me.active_zenamon_sprite);
-    document.getElementById('p2-sprite').src = opp.active_zenamon_sprite;
+    const p1Sprite = isSpectator ? me.active_zenamon_sprite : getBackSprite(me.active_zenamon_sprite);
+    const p2Sprite = opp.active_zenamon_sprite;
+
+    if (p1Sprite && p1Sprite !== state.lastP1Sprite) {
+        state.lastP1Sprite = p1Sprite;
+        animateEntry(document.querySelector('.zenamon-sprite-container.p1'), 'left');
+    }
+    if (p2Sprite && p2Sprite !== state.lastP2Sprite) {
+        state.lastP2Sprite = p2Sprite;
+        animateEntry(document.querySelector('.zenamon-sprite-container.p2'), 'right');
+    }
+
+    document.getElementById('p1-sprite').src = p1Sprite;
+    document.getElementById('p2-sprite').src = p2Sprite;
     const pendingFaintSides = getFaintingSidesFromEvents(status, me, opp);
     pendingFaintSides.forEach(side => {
         const sideFainted = side === 'p1' ? meFainted : oppFainted;
@@ -452,7 +476,7 @@ document.getElementById('search-btn').onclick = async () => {
         resultsList.classList.add('hidden');
     } else if (data.results && data.results.length > 0) {
         resultsList.classList.remove('hidden');
-        data.results.forEach(z => {
+        data.results.forEach((z, index) => {
             const div = document.createElement('div');
             div.className = 'search-item';
             div.innerHTML = `
@@ -461,6 +485,7 @@ document.getElementById('search-btn').onclick = async () => {
             `;
             div.onclick = () => selectZenamon(z.name);
             resultsList.appendChild(div);
+            animateEntry(div, index % 2 === 0 ? 'left' : 'right');
         });
     } else {
         alert("Nessun Zenamon trovato.");
@@ -475,8 +500,10 @@ async function selectZenamon(nameOrId) {
         document.getElementById('result-name').innerText = data.name.toUpperCase();
         document.getElementById('result-img').src = data.sprite;
         document.getElementById('result-types').innerText = data.types.join(' / ');
-        document.getElementById('search-result').classList.remove('hidden');
+        const resultCard = document.getElementById('search-result');
+        resultCard.classList.remove('hidden');
         document.getElementById('search-results-list').classList.add('hidden');
+        animateEntry(resultCard, 'bottom');
     } else {
         alert("Errore nel recupero dei dettagli.");
     }
@@ -491,7 +518,16 @@ document.getElementById('add-to-team-btn').onclick = () => {
 
 function updateTeamUI() {
     const list = document.getElementById('team-list');
-    list.innerHTML = state.team.map(z => `<div class="team-item">${z.name.toUpperCase()}</div>`).join('');
+    list.innerHTML = '';
+    state.team.forEach((z, index) => {
+        const item = document.createElement('div');
+        item.className = 'team-item';
+        item.innerText = z.name.toUpperCase();
+        list.appendChild(item);
+        if (index === state.team.length - 1) {
+            animateEntry(item, 'right');
+        }
+    });
     document.getElementById('team-count').innerText = state.team.length;
     if (state.team.length === 3) {
         document.getElementById('confirm-team-btn').classList.remove('hidden');
