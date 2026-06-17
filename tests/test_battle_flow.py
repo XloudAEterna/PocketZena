@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from backend.main import app, get_db
-from backend.models.database import Base, ZenamonCache
+from backend.models.database import Base, ZenamonCache, DuelZenamon, Duel
 import json
 
 # Setup database per i test
@@ -100,7 +100,7 @@ def test_switch_action(client):
     # 2. Switch P1 (cambia Bulbasaur con Charmander - posizione 2)
     client.post(f"/api/v1/duels/{code}/action", 
                 headers={"X-Session-Token": token1},
-                json={"type": "SWITCH", "zenamon_index": 2})
+                json={"type": "SWITCH", "zenamon_index": 2, "move_name": "tackle"})
     
     # P2 attacca
     client.post(f"/api/v1/duels/{code}/action", 
@@ -110,6 +110,95 @@ def test_switch_action(client):
     # 3. Verifica Switch
     status = client.get(f"/api/v1/duels/{code}/status").json()
     assert status["player1"]["active_zenamon_name"] == "charmander"
+
+def test_duel_status_includes_winner_identity(client):
+    p1 = client.post("/api/v1/players", json={"nickname": "AAA"}).json()
+    p2 = client.post("/api/v1/players", json={"nickname": "BBB"}).json()
+    token1, token2 = p1["token"], p2["token"]
+    duel = client.post("/api/v1/duels", headers={"X-Session-Token": token1}).json()
+    code = duel["duel_code"]
+    client.post(f"/api/v1/duels/{code}/join", headers={"X-Session-Token": token2})
+
+    db = TestingSessionLocal()
+    try:
+        finished_duel = db.get(Duel, code)
+        finished_duel.status = "FINISHED"
+        finished_duel.winner_id = p1["id"]
+        db.commit()
+    finally:
+        db.close()
+
+    status = client.get(f"/api/v1/duels/{code}/status").json()
+    assert status["status"] == "FINISHED"
+    assert status["winner_id"] == p1["id"]
+    assert status["winner_nickname"] == "AAA"
+
+def test_fainted_active_forces_immediate_switch(client):
+    p1 = client.post("/api/v1/players", json={"nickname": "AAA"}).json()
+    p2 = client.post("/api/v1/players", json={"nickname": "BBB"}).json()
+    token1, token2 = p1["token"], p2["token"]
+    duel = client.post("/api/v1/duels", headers={"X-Session-Token": token1}).json()
+    code = duel["duel_code"]
+    client.post(f"/api/v1/duels/{code}/join", headers={"X-Session-Token": token2})
+    client.post(f"/api/v1/duels/{code}/team", headers={"X-Session-Token": token1}, json={"zenamon_ids": [25, 4, 1]})
+    client.post(f"/api/v1/duels/{code}/team", headers={"X-Session-Token": token2}, json={"zenamon_ids": [1, 7, 4]})
+
+    db = TestingSessionLocal()
+    try:
+        p2_active = db.query(DuelZenamon).filter(
+            DuelZenamon.duel_id == code,
+            DuelZenamon.player_id == p2["id"],
+            DuelZenamon.is_active == True
+        ).first()
+        p2_active.current_hp = 1
+        db.commit()
+    finally:
+        db.close()
+
+    res1 = client.post(
+        f"/api/v1/duels/{code}/action",
+        headers={"X-Session-Token": token1},
+        json={"type": "ATTACK", "move_name": "tackle"}
+    )
+    assert res1.status_code == 200
+
+    res2 = client.post(
+        f"/api/v1/duels/{code}/action",
+        headers={"X-Session-Token": token2},
+        json={"type": "ATTACK", "move_name": "tackle"}
+    )
+    assert res2.status_code == 200
+
+    status = client.get(f"/api/v1/duels/{code}/status").json()
+    assert status["status"] == "BATTLE"
+    assert status["player2"]["active_zenamon_is_fainted"] is True
+    assert status["player2"]["active_zenamon_hp"] == 0
+
+    blocked_attack = client.post(
+        f"/api/v1/duels/{code}/action",
+        headers={"X-Session-Token": token1},
+        json={"type": "ATTACK", "move_name": "tackle"}
+    )
+    assert blocked_attack.status_code == 400
+
+    invalid_fainted_attack = client.post(
+        f"/api/v1/duels/{code}/action",
+        headers={"X-Session-Token": token2},
+        json={"type": "ATTACK", "move_name": "tackle"}
+    )
+    assert invalid_fainted_attack.status_code == 400
+
+    switch = client.post(
+        f"/api/v1/duels/{code}/action",
+        headers={"X-Session-Token": token2},
+        json={"type": "SWITCH", "zenamon_index": 2}
+    )
+    assert switch.status_code == 200
+
+    status = client.get(f"/api/v1/duels/{code}/status").json()
+    assert status["current_turn"] == 3
+    assert status["player2"]["active_zenamon_name"] == "squirtle"
+    assert status["player2"]["active_zenamon_is_fainted"] is False
 
 def test_full_preparation_flow(client):
     # 1. Registrazione Giocatori

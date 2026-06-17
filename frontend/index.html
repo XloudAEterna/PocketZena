@@ -9,7 +9,7 @@
 <body>
     <div id="app">
         <!-- Schermata di Login -->
-        <section id="login-page" class="page">
+        <section id="login-page" class="page room-page">
             <h1>POCKET-ZENA</h1>
             <div class="card">
                 <p>Inserisci il tuo nickname (3 lettere maiuscole)</p>
@@ -19,7 +19,7 @@
         </section>
 
         <!-- Menu Principale -->
-        <section id="menu-page" class="page hidden">
+        <section id="menu-page" class="page room-page hidden">
             <h1>Benvenuto, <span id="user-nickname"></span></h1>
             <div class="menu-options">
                 <button id="create-duel-btn">Crea Duello</button>
@@ -32,10 +32,11 @@
         </section>
 
         <!-- Lobby Attesa -->
-        <section id="lobby-page" class="page hidden">
-            <h1>In attesa di un avversario...</h1>
-            <p>Condividi questo codice: <span id="display-duel-code" class="highlight"></span></p>
-        </section>
+<section id="lobby-page" class="page room-page hidden">
+    <h1>In attesa di un avversario...</h1>
+    <p>Condividi questo codice: <span id="display-duel-code" class="highlight"></span></p>
+    <button id="cancel-search-btn">❌ Annulla ricerca</button>
+</section>
 
         <!-- Selezione Zenamon -->
         <section id="selection-page" class="page hidden">
@@ -63,11 +64,9 @@
 
         <!-- Battaglia -->
         <section id="battle-page" class="page hidden">
-            <div id="spectator-controls" class="hidden" style="text-align: center; margin-bottom: 10px;">
-                <span>Tifa per:</span>
-                <button id="cheer-p1-btn" style="padding: 5px 10px; font-size: 0.8rem;">P1</button>
-                <button id="cheer-p2-btn" style="padding: 5px 10px; font-size: 0.8rem;">P2</button>
-            </div>
+            <button id="music-toggle-btn" class="audio-toggle" type="button" title="Mute musica">Musica ON</button>
+            <audio id="battle-music" src="audio/battle-theme.mp3" loop preload="auto"></audio>
+
             <div class="battle-header">
                 <div class="player-info p2">
                     <span id="p2-name">Avversario</span>
@@ -116,16 +115,16 @@
             
             <!-- Reazioni -->
             <div class="reactions-overlay">
-                <button class="react-btn" data-emoji="🔥">🔥</button>
-                <button class="react-btn" data-emoji="👏">👏</button>
-                <button class="react-btn" data-emoji="😢">😢</button>
-                <button class="react-btn" data-emoji="😲">😲</button>
+                <button class="react-btn" data-emoji="&#128293;">&#128293;</button>
+                <button class="react-btn" data-emoji="&#128079;">&#128079;</button>
+                <button class="react-btn" data-emoji="&#128546;">&#128546;</button>
+                <button class="react-btn" data-emoji="&#128562;">&#128562;</button>
             </div>
             <div id="reactions-display"></div>
         </section>
         
         <!-- Schermata Vittoria -->
-        <section id="result-page" class="page hidden">
+        <section id="result-page" class="page result-page hidden">
              <h1 id="winner-text"></h1>
              <button onclick="location.reload()">Torna al Menu</button>
         </section>

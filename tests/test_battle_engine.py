@@ -96,6 +96,39 @@ def test_resolve_turn_switch(db):
     assert "P1 ritira il suo Zenamon" in turn.resolution_log
     assert "manda in campo charmander" in turn.resolution_log
 
+def test_resolve_turn_switch_and_attack(db):
+    # Setup Duello
+    duel = Duel(id="SWITCH_ATK", player1_id=1, player2_id=2, status="BATTLE", current_turn=1)
+    db.add(duel)
+    
+    # Squadra P1
+    dz1_a = DuelZenamon(duel_id="SWITCH_ATK", player_id=1, zenamon_id=1, current_hp=45, position=1, is_active=True)
+    dz1_b = DuelZenamon(duel_id="SWITCH_ATK", player_id=1, zenamon_id=4, current_hp=39, position=2, is_active=False)
+    
+    # Squadra P2
+    dz2 = DuelZenamon(duel_id="SWITCH_ATK", player_id=2, zenamon_id=4, current_hp=39, position=1, is_active=True)
+    db.add_all([dz1_a, dz1_b, dz2])
+    
+    # Turno
+    turn = Turn(duel_id="SWITCH_ATK", turn_number=1, 
+                p1_action=json.dumps({"type": "SWITCH", "zenamon_index": 2, "move_name": "tackle"}),
+                p2_action=json.dumps({"type": "ATTACK", "move_name": "tackle"}))
+    db.add(turn)
+    db.commit()
+    
+    # Esecuzione
+    resolve_turn(duel, db)
+    
+    # Verifiche
+    assert dz1_a.is_active is False
+    assert dz1_b.is_active is True
+    assert "P1 ritira il suo Zenamon" in turn.resolution_log
+    assert "manda in campo charmander" in turn.resolution_log
+    assert "charmander usa tackle" in turn.resolution_log.lower()
+    # Verifica che il danno sia andato al nuovo mostriciattolo e non a quello ritirato
+    assert dz1_a.current_hp == 45
+    assert dz1_b.current_hp < 39
+
 def test_resolve_turn_victory(db):
     # Setup Duello
     duel = Duel(id="VICTORY", player1_id=1, player2_id=2, status="BATTLE", current_turn=1)
