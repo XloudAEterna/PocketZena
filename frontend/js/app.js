@@ -520,12 +520,34 @@ document.getElementById('add-to-team-btn').onclick = () => {
 
 function updateTeamUI() {
     const list = document.getElementById('team-list');
-    list.innerHTML = state.team.map(z => `<div class="team-item">${z.name.toUpperCase()}</div>`).join('');
+
+    list.innerHTML = state.team.map(z => `
+        <div class="team-item">
+            ${z.name.toUpperCase()}
+            <button onclick="removeFromTeam(${z.id})">
+                ✖
+            </button>
+        </div>
+    `).join('');
+
     document.getElementById('team-count').innerText = state.team.length;
+
     if (state.team.length === 3) {
         document.getElementById('confirm-team-btn').classList.remove('hidden');
     }
 }
+
+function removeFromTeam(id) {
+    state.team = state.team.filter(
+        z => z.id !== id
+    );
+
+    updateTeamUI();
+}
+
+document.getElementById('confirm-team-btn').onclick = async () => {
+
+};
 
 document.getElementById('confirm-team-btn').onclick = async () => {
     const ids = state.team.map(z => z.id);
@@ -664,6 +686,7 @@ async function executeBattleAction(moveName) {
 window.confirmSwitch = confirmSwitch;
 window.sendBattleAction = sendBattleAction; // Rendi globale per onclick
 window.executeBattleAction = executeBattleAction;
+window.removeFromTeam = removeFromTeam;
 
 document.getElementById('music-toggle-btn').onclick = () => {
     if (!state.musicMuted && !state.musicStarted) {
