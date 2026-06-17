@@ -208,9 +208,9 @@ async function apiGet(endpoint) {
 
 // --- Azioni ---
 document.getElementById('login-btn').onclick = async () => {
-    const nick = document.getElementById('nickname-input').value.toUpperCase();
-    if (nick.length < 3) {
-        alert("Il nickname deve essere di almeno 3 caratteri!");
+    const nick = document.getElementById('nickname-input').value.trim().toUpperCase();
+    if (nick.length !== 3) {
+        alert("Inserisci un nickname di 3 caratteri");
         return;
     }
     const data = await apiPost('/players', { nickname: nick }, false);
