@@ -125,6 +125,9 @@ def test_resolve_turn_switch_and_attack(db):
     assert "P1 ritira il suo Zenamon" in turn.resolution_log
     assert "manda in campo charmander" in turn.resolution_log
     assert "charmander usa tackle" in turn.resolution_log.lower()
+    # Verifica che il danno sia andato al nuovo mostriciattolo e non a quello ritirato
+    assert dz1_a.current_hp == 45
+    assert dz1_b.current_hp < 39
 
 def test_resolve_turn_victory(db):
     # Setup Duello
