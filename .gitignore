@@ -5,3 +5,7 @@ venv/
 .idea/
 .junie/
 *.sqlite3
+node_modules/
+playwright-report/
+test-results/
+.playwright-cache/
