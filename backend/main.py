@@ -262,63 +262,51 @@ async def get_duel_status(code: str, db: Session = Depends(get_db)):
     p1 = db.get(Player, duel.player1_id)
     p2 = db.get(Player, duel.player2_id) if duel.player2_id else None
     
-    turn = db.query(Turn).filter(Turn.duel_id == duel.id, Turn.turn_number == duel.current_turn).first()
-
     # Dati Zenamon Attivi
-    def get_player_info(player_id):
-        if not player_id: return {
-            "nickname": "---", "active_zenamon_name": None, "active_zenamon_hp": None, 
-            "active_zenamon_max_hp": None, "active_zenamon_sprite": None, "team": [], "is_ready": False
-        }
-        
-        # Info Zenamon Attivo
+    def get_team_info(player_id):
+        if not player_id:
+            return []
+
+        team = db.query(DuelZenamon).filter(
+            DuelZenamon.duel_id == duel.id,
+            DuelZenamon.player_id == player_id
+        ).order_by(DuelZenamon.position).all()
+
+        result = []
+        for dz in team:
+            z_cache = db.get(ZenamonCache, dz.zenamon_id)
+            max_hp = json.loads(z_cache.base_stats).get("hp", 100)
+            result.append({
+                "position": dz.position,
+                "name": z_cache.name,
+                "current_hp": dz.current_hp,
+                "max_hp": max_hp,
+                "is_active": dz.is_active,
+                "is_fainted": dz.is_fainted
+            })
+        return result
+
+    def get_active_info(player_id):
+        if not player_id: return None, None, None, None, False
         active = db.query(DuelZenamon).filter(
             DuelZenamon.duel_id == duel.id, 
             DuelZenamon.player_id == player_id,
             DuelZenamon.is_active == True
         ).first()
-        
-        z_name, z_hp, z_max, z_sprite = None, None, None, None
-        if active:
-            z_cache = db.get(ZenamonCache, active.zenamon_id)
-            z_max = json.loads(z_cache.base_stats).get("hp", 100)
-            z_name, z_hp, z_sprite = z_cache.name, active.current_hp, z_cache.sprite_url
-            
-        # Info Squadra
-        team_dz = db.query(DuelZenamon).filter(
-            DuelZenamon.duel_id == duel.id, 
-            DuelZenamon.player_id == player_id
-        ).order_by(DuelZenamon.position).all()
-        
-        team_status = []
-        for dz in team_dz:
-            zc = db.get(ZenamonCache, dz.zenamon_id)
-            m_hp = json.loads(zc.base_stats).get("hp", 100)
-            team_status.append({
-                "name": zc.name,
-                "current_hp": dz.current_hp,
-                "max_hp": m_hp,
-                "is_fainted": dz.is_fainted
-            })
-            
-        ready = False
-        if turn:
-            ready = (turn.p1_action is not None) if player_id == duel.player1_id else (turn.p2_action is not None)
-            
-        player_obj = db.get(Player, player_id)
-        
-        return {
-            "nickname": player_obj.nickname,
-            "active_zenamon_name": z_name,
-            "active_zenamon_hp": z_hp,
-            "active_zenamon_max_hp": z_max,
-            "active_zenamon_sprite": z_sprite,
-            "team": team_status,
-            "is_ready": ready
-        }
+        if not active: return None, None, None, None, False
+        z_cache = db.get(ZenamonCache, active.zenamon_id)
+        max_hp = json.loads(z_cache.base_stats).get("hp", 100)
+        return z_cache.name, active.current_hp, max_hp, z_cache.sprite_url, active.is_fainted
 
-    p1_info = get_player_info(duel.player1_id)
-    p2_info = get_player_info(duel.player2_id)
+    p1_z_name, p1_z_hp, p1_z_max, p1_z_sprite, p1_z_fainted = get_active_info(duel.player1_id)
+    p2_z_name, p2_z_hp, p2_z_max, p2_z_sprite, p2_z_fainted = get_active_info(duel.player2_id)
+    p1_team = get_team_info(duel.player1_id)
+    p2_team = get_team_info(duel.player2_id)
+    
+    # Verifica se i giocatori sono pronti per il turno corrente
+    turn = db.query(Turn).filter(Turn.duel_id == duel.id, Turn.turn_number == duel.current_turn).first()
+    p1_ready = turn.p1_action is not None if turn else False
+    p2_ready = turn.p2_action is not None if turn else False
     
     # Eventi (Log del turno precedente o corrente se processato)
     events = []
@@ -331,16 +319,34 @@ async def get_duel_status(code: str, db: Session = Depends(get_db)):
         events = last_processed_turn.resolution_log.split("\n")
     
     # Reazioni
-    reactions = db.query(Reaction).filter(Reaction.duel_id == duel.id).order_by(Reaction.created_at.desc()).limit(10).all()
-    reaction_list = [{"id": r.id, "emoji": r.emoji} for r in reactions]
+    reactions = db.query(Reaction).filter(Reaction.duel_id == duel.id).order_by(Reaction.created_at.desc()).limit(5).all()
+    reaction_list = [{"id": r.id, "emoji": r.emoji} for r in reversed(reactions)]
     
     winner = db.get(Player, duel.winner_id) if duel.winner_id else None
 
     return {
         "status": duel.status,
         "current_turn": duel.current_turn,
-        "player1": p1_info,
-        "player2": p2_info,
+        "player1": {
+            "nickname": p1.nickname,
+            "active_zenamon_name": p1_z_name,
+            "active_zenamon_hp": p1_z_hp,
+            "active_zenamon_max_hp": p1_z_max,
+            "active_zenamon_sprite": p1_z_sprite,
+            "active_zenamon_is_fainted": p1_z_fainted,
+            "team": p1_team,
+            "is_ready": p1_ready
+        },
+        "player2": {
+            "nickname": p2.nickname if p2 else "---",
+            "active_zenamon_name": p2_z_name,
+            "active_zenamon_hp": p2_z_hp,
+            "active_zenamon_max_hp": p2_z_max,
+            "active_zenamon_sprite": p2_z_sprite,
+            "active_zenamon_is_fainted": p2_z_fainted,
+            "team": p2_team,
+            "is_ready": p2_ready
+        } if p2 else { "nickname": "---", "is_ready": False, "team": [] },
         "new_events": events,
         "reactions": reaction_list,
         "winner_nickname": winner.nickname if winner else None
@@ -351,43 +357,85 @@ async def send_action(code: str, action: BattleAction, current_player: Player = 
     duel = db.query(Duel).filter(Duel.id == code.upper()).first()
     if not duel:
         raise HTTPException(status_code=404, detail="Duello non trovato")
-    
+
     if duel.status != "BATTLE":
         raise HTTPException(status_code=400, detail="Non sei in fase di combattimento")
-    
+
     turn = db.query(Turn).filter(Turn.duel_id == duel.id, Turn.turn_number == duel.current_turn).first()
     if not turn:
         raise HTTPException(status_code=500, detail="Turno non trovato")
 
-    # Validazione Zenamon esausto: deve switchare
-    active_zenamon = db.query(DuelZenamon).filter(
+    if current_player.id not in (duel.player1_id, duel.player2_id):
+        raise HTTPException(status_code=403, detail="Non partecipi a questo duello")
+
+    action.type = action.type.upper()
+    if action.type not in ("ATTACK", "SWITCH"):
+        raise HTTPException(status_code=400, detail="Azione non valida")
+
+    p1_active = db.query(DuelZenamon).filter(
         DuelZenamon.duel_id == duel.id,
-        DuelZenamon.player_id == current_player.id,
+        DuelZenamon.player_id == duel.player1_id,
         DuelZenamon.is_active == True
     ).first()
-    
-    if active_zenamon and active_zenamon.is_fainted:
-        if action.type != "SWITCH" and action.zenamon_index is None:
-            raise HTTPException(status_code=400, detail="Il tuo Zenamon è esausto, devi cambiarlo!")
+    p2_active = db.query(DuelZenamon).filter(
+        DuelZenamon.duel_id == duel.id,
+        DuelZenamon.player_id == duel.player2_id,
+        DuelZenamon.is_active == True
+    ).first()
+    active_by_player = {duel.player1_id: p1_active, duel.player2_id: p2_active}
+    forced_switch_players = {
+        player_id for player_id, active in active_by_player.items()
+        if active and active.is_fainted
+    }
+
+    if current_player.id in forced_switch_players and action.type != "SWITCH":
+        raise HTTPException(status_code=400, detail="Il tuo Zenamon e' esausto: devi cambiarlo")
+    if forced_switch_players and current_player.id not in forced_switch_players:
+        raise HTTPException(status_code=400, detail="Attendi che l'avversario cambi lo Zenamon esausto")
+
+    if action.type == "ATTACK":
+        if not action.move_name:
+            raise HTTPException(status_code=400, detail="Devi scegliere una mossa")
+    else:
+        if action.zenamon_index is None:
+            raise HTTPException(status_code=400, detail="Devi scegliere uno Zenamon")
+        target = db.query(DuelZenamon).filter(
+            DuelZenamon.duel_id == duel.id,
+            DuelZenamon.player_id == current_player.id,
+            DuelZenamon.position == action.zenamon_index
+        ).first()
+        if not target:
+            raise HTTPException(status_code=400, detail="Zenamon non trovato nella tua squadra")
+        if target.is_active:
+            raise HTTPException(status_code=400, detail="Questo Zenamon e' gia' in campo")
+        if target.is_fainted:
+            raise HTTPException(status_code=400, detail="Questo Zenamon e' esausto")
 
     if current_player.id == duel.player1_id:
         if turn.p1_action:
-            raise HTTPException(status_code=400, detail="Azione già inviata per questo turno")
+            raise HTTPException(status_code=400, detail="Azione gia' inviata per questo turno")
         turn.p1_action = action.model_dump_json()
-    elif current_player.id == duel.player2_id:
-        if turn.p2_action:
-            raise HTTPException(status_code=400, detail="Azione già inviata per questo turno")
-        turn.p2_action = action.model_dump_json()
     else:
-        raise HTTPException(status_code=403, detail="Non partecipi a questo duello")
-    
+        if turn.p2_action:
+            raise HTTPException(status_code=400, detail="Azione gia' inviata per questo turno")
+        turn.p2_action = action.model_dump_json()
+
     db.commit()
-    
-    # Se entrambi pronti, risolvi il turno
-    if turn.p1_action and turn.p2_action:
+
+    p1_must_switch = duel.player1_id in forced_switch_players
+    p2_must_switch = duel.player2_id in forced_switch_players
+    forced_actions_ready = (
+        forced_switch_players
+        and (not p1_must_switch or turn.p1_action)
+        and (not p2_must_switch or turn.p2_action)
+    )
+
+    # In un turno normale servono entrambi. Dopo un KO attivo servono solo gli switch obbligatori.
+    if (not forced_switch_players and turn.p1_action and turn.p2_action) or forced_actions_ready:
         resolve_turn(duel, db)
-        
+
     return {"accepted": True}
+
 
 @app.post("/api/v1/duels/{code}/reaction")
 async def send_reaction(code: str, reaction_in: ReactionCreate, current_player: Player = Depends(get_current_player), db: Session = Depends(get_db)):
