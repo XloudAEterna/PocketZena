@@ -1,5 +1,6 @@
 const API_BASE = '/api/v1';
 let state = {
+    playerId: null,
     nickname: '',
     token: '',
     duelCode: '',
@@ -209,13 +210,14 @@ async function apiGet(endpoint) {
 
 // --- Azioni ---
 document.getElementById('login-btn').onclick = async () => {
-    const nick = document.getElementById('nickname-input').value.toUpperCase();
-    if (nick.length < 3) {
-        alert("Il nickname deve essere di almeno 3 caratteri!");
+    const nick = document.getElementById('nickname-input').value.trim().toUpperCase();
+    if (nick.length !== 3) {
+        alert("Inserisci un nickname di 3 caratteri");
         return;
     }
     const data = await apiPost('/players', { nickname: nick }, false);
     if (data.token) {
+        state.playerId = data.id;
         state.nickname = data.nickname;
         state.token = data.token;
         document.getElementById('user-nickname').innerText = state.nickname;
@@ -317,11 +319,20 @@ function updateUI(status) {
         if (!state.resultDelayTimer) {
             state.resultDelayTimer = setTimeout(() => {
                 showPage('result-page');
-                document.getElementById('winner-text').innerText = "Vincitore: " + status.winner_nickname;
+                document.getElementById('winner-text').innerText = getResultMessage(status);
                 state.resultDelayTimer = null;
             }, 2400);
         }
     }
+}
+
+function getResultMessage(status) {
+    const winnerName = status.winner_nickname || 'Giocatore';
+    if (state.role === 'PLAYER' && status.winner_id !== state.playerId) {
+        return `${state.nickname} hai perso!`;
+    }
+
+    return `${winnerName} ha vinto!`;
 }
 
 function displayReactions(reactions) {
@@ -461,7 +472,7 @@ document.getElementById('search-btn').onclick = async () => {
                 <img src="${z.sprite || ''}" alt="${z.name}" style="width: 50px;">
                 <span>${z.name.toUpperCase()}</span>
             `;
-            div.onclick = () => selectZenamon(z.name);
+            div.onclick = () => addZenamonDirectly(z.name);
             resultsList.appendChild(div);
         });
     } else {
@@ -484,6 +495,33 @@ async function selectZenamon(nameOrId) {
     }
 }
 
+async function addZenamonDirectly(nameOrId) {
+
+    const data = await apiGet(
+        `/zenamon/${encodeURIComponent(nameOrId)}`
+    );
+
+    if (!data.id) {
+        alert("Errore nel recupero dei dettagli.");
+        return;
+    }
+
+    if (state.team.length >= 3) {
+        return;
+    }
+
+    const alreadyPresent =
+        state.team.find(z => z.id === data.id);
+
+    if (alreadyPresent) {
+        return;
+    }
+
+    state.team.push(data);
+
+    updateTeamUI();
+}
+
 document.getElementById('add-to-team-btn').onclick = () => {
     if (state.team.length < 3 && !state.team.find(z => z.id === currentSearchResult.id)) {
         state.team.push(currentSearchResult);
@@ -493,12 +531,34 @@ document.getElementById('add-to-team-btn').onclick = () => {
 
 function updateTeamUI() {
     const list = document.getElementById('team-list');
-    list.innerHTML = state.team.map(z => `<div class="team-item">${z.name.toUpperCase()}</div>`).join('');
+
+    list.innerHTML = state.team.map(z => `
+        <div class="team-item">
+            ${z.name.toUpperCase()}
+            <button onclick="removeFromTeam(${z.id})">
+                ✖
+            </button>
+        </div>
+    `).join('');
+
     document.getElementById('team-count').innerText = state.team.length;
+
     if (state.team.length === 3) {
         document.getElementById('confirm-team-btn').classList.remove('hidden');
     }
 }
+
+function removeFromTeam(id) {
+    state.team = state.team.filter(
+        z => z.id !== id
+    );
+
+    updateTeamUI();
+}
+
+document.getElementById('confirm-team-btn').onclick = async () => {
+
+};
 
 document.getElementById('confirm-team-btn').onclick = async () => {
     const ids = state.team.map(z => z.id);
@@ -637,6 +697,7 @@ async function executeBattleAction(moveName) {
 window.confirmSwitch = confirmSwitch;
 window.sendBattleAction = sendBattleAction; // Rendi globale per onclick
 window.executeBattleAction = executeBattleAction;
+window.removeFromTeam = removeFromTeam;
 
 document.getElementById('music-toggle-btn').onclick = () => {
     if (!state.musicMuted && !state.musicStarted) {

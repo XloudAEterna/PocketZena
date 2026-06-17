@@ -40,7 +40,7 @@ def test_create_player(client):
 def test_create_player_invalid_nickname(client):
     response = client.post("/api/v1/players", json={"nickname": "aa"}) # Troppo corto
     assert response.status_code == 422
-    response = client.post("/api/v1/players", json={"nickname": "ABCDEFGHIJK"}) # Troppo lungo
+    response = client.post("/api/v1/players", json={"nickname": "ABCD"}) # Troppo lungo
     assert response.status_code == 422
 
 def test_create_duel(client):

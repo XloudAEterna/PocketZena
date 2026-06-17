@@ -362,6 +362,7 @@ async def get_duel_status(code: str, db: Session = Depends(get_db)):
         } if p2 else { "nickname": "---", "is_ready": False, "team": [] },
         "new_events": events,
         "reactions": reaction_list,
+        "winner_id": winner.id if winner else None,
         "winner_nickname": winner.nickname if winner else None
     }
 

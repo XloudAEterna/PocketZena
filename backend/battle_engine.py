@@ -49,16 +49,11 @@ def resolve_turn(duel: Duel, db: Session):
                 log.append(f"{player.nickname} ritira il suo Zenamon e manda in campo {z_cache.name}!")
                 act["zenamon"] = new_z
 
-    p1_active = db.query(DuelZenamon).filter(
-        DuelZenamon.duel_id == duel.id,
-        DuelZenamon.player_id == duel.player1_id,
-        DuelZenamon.is_active == True
-    ).first()
-    p2_active = db.query(DuelZenamon).filter(
-        DuelZenamon.duel_id == duel.id,
-        DuelZenamon.player_id == duel.player2_id,
-        DuelZenamon.is_active == True
-    ).first()
+    db.flush()
+
+    # Sottofase 2: scontro tra i mostriciattoli in campo
+    p1_active = actions[0]["zenamon"]
+    p2_active = actions[1]["zenamon"]
 
     atk_actions = []
     for a in actions:
