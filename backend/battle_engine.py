@@ -60,7 +60,12 @@ def resolve_turn(duel: Duel, db: Session):
         DuelZenamon.is_active == True
     ).first()
 
-    atk_actions = [a for a in actions if a["action"]["type"] == "ATTACK"]
+    atk_actions = []
+    for a in actions:
+        if a["action"]["type"] == "ATTACK":
+            atk_actions.append(a)
+        elif a["action"]["type"] == "SWITCH" and a["action"].get("move_name"):
+            atk_actions.append(a)
 
     def get_speed(dz):
         z_cache = db.get(ZenamonCache, dz.zenamon_id)
