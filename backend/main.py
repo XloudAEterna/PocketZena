@@ -158,7 +158,20 @@ async def spectate_duel(code: str, current_player: Player = Depends(get_current_
 
 @app.get("/api/v1/zenamon/search", response_model=ZenamonSearchResult)
 async def search_zenamon(name: str, db: Session = Depends(get_db)):
-    names = await search_zenamon_names(name)
+    query = name.strip()
+    if query.isdigit():
+        result = await get_zenamon_basic_data(query, db)
+        if not result:
+            return {"results": []}
+
+        return {"results": [{
+            "id": result.get("id"),
+            "name": result["name"],
+            "types": result.get("types"),
+            "sprite": result.get("sprite_url")
+        }]}
+
+    names = await search_zenamon_names(query)
     if not names:
         return {"results": []}
     
