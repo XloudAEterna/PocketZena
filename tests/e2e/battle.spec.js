@@ -1,5 +1,5 @@
-const { test, expect } = require('@playwright/test');
-const { uniqueNick, login, createDuel, joinDuel, addZenamon, confirmTeam } = require('./helpers');
+import { test, expect } from '@playwright/test';
+import { uniqueNick, login, createDuel, joinDuel, addZenamon, confirmTeam } from './helpers.js';
 
 // Zenamon standard usati nei test: bulbasaur(1), charmander(4), squirtle(7)
 const TEAM_IDS = ['1', '4', '7'];
@@ -23,11 +23,9 @@ async function setupBattle(browser) {
   // page1 attende il cambio di stato via polling
   await page1.waitForSelector('#selection-page:not(.hidden)', { timeout: 10_000 });
 
-  // Selezione squadre in parallelo
-  await Promise.all([
-    (async () => { for (const id of TEAM_IDS) await addZenamon(page1, id); })(),
-    (async () => { for (const id of TEAM_IDS) await addZenamon(page2, id); })(),
-  ]);
+  // Selezione squadre sequenziale per evitare race condition sulla cache SQLite
+  for (const id of TEAM_IDS) await addZenamon(page1, id);
+  for (const id of TEAM_IDS) await addZenamon(page2, id);
 
   await Promise.all([confirmTeam(page1), confirmTeam(page2)]);
 

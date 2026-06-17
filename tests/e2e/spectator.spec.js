@@ -1,5 +1,5 @@
-const { test, expect } = require('@playwright/test');
-const { uniqueNick, login, createDuel, joinDuel, addZenamon, confirmTeam } = require('./helpers');
+import { test, expect } from '@playwright/test';
+import { uniqueNick, login, createDuel, joinDuel, addZenamon, confirmTeam } from './helpers.js';
 
 const TEAM_IDS = ['1', '4', '7'];
 
@@ -54,7 +54,15 @@ test.describe('Modalità Spettatore', () => {
       await page3.click('#spectate-duel-btn');
       await page3.waitForSelector('#battle-page:not(.hidden)');
 
-      // I controlli di combattimento non devono essere visibili per lo spettatore
+      // Avvia la battaglia: entrambi selezionano la squadra
+      for (const id of TEAM_IDS) await addZenamon(page1, id);
+      for (const id of TEAM_IDS) await addZenamon(page2, id);
+      await Promise.all([confirmTeam(page1), confirmTeam(page2)]);
+
+      // Aspetta che updateBattleUI giri per lo spettatore (mostra "Stai assistendo")
+      await page3.waitForSelector('#waiting-turn:not(.hidden)', { timeout: 15_000 });
+
+      // Solo dopo che la battaglia è attiva i controlli vengono nascosti per lo spettatore
       await expect(page3.locator('#battle-controls')).toBeHidden();
     } finally {
       await ctx1.close();
@@ -84,11 +92,9 @@ test.describe('Modalità Spettatore', () => {
       await page3.click('#spectate-duel-btn');
       await page3.waitForSelector('#battle-page:not(.hidden)');
 
-      // Entrambi selezionano la squadra e iniziano la battaglia
-      await Promise.all([
-        (async () => { for (const id of TEAM_IDS) await addZenamon(page1, id); })(),
-        (async () => { for (const id of TEAM_IDS) await addZenamon(page2, id); })(),
-      ]);
+      // Entrambi selezionano la squadra e iniziano la battaglia (sequenziale per evitare race condition SQLite)
+      for (const id of TEAM_IDS) await addZenamon(page1, id);
+      for (const id of TEAM_IDS) await addZenamon(page2, id);
       await Promise.all([confirmTeam(page1), confirmTeam(page2)]);
 
       // Lo spettatore vede gli HP aggiornati

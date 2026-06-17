@@ -1,5 +1,5 @@
-const { test, expect } = require('@playwright/test');
-const { uniqueNick, login, createDuel, joinDuel } = require('./helpers');
+import { test, expect } from '@playwright/test';
+import { uniqueNick, login, createDuel, joinDuel } from './helpers.js';
 
 test.describe('Gestione Duello', () => {
   test('crea duello genera un codice di 4 caratteri nella lobby', async ({ page }) => {
@@ -29,7 +29,8 @@ test.describe('Gestione Duello', () => {
     await login(page, uniqueNick());
 
     const dialogPromise = page.waitForEvent('dialog');
-    await page.click('#join-duel-btn');
+    // Non await-are: click blocca in attesa che la dialog venga gestita
+    page.click('#join-duel-btn');
 
     const dialog = await dialogPromise;
     expect(dialog.message()).toBeTruthy();

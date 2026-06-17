@@ -1,5 +1,5 @@
-const { test, expect } = require('@playwright/test');
-const { uniqueNick, login } = require('./helpers');
+import { test, expect } from '@playwright/test';
+import { uniqueNick, login } from './helpers.js';
 
 test.describe('Login', () => {
   test('nickname valido porta al menu principale', async ({ page }) => {
@@ -15,7 +15,8 @@ test.describe('Login', () => {
 
     const dialogPromise = page.waitForEvent('dialog');
     await page.fill('#nickname-input', 'AB');
-    await page.click('#login-btn');
+    // Non await-are: click blocca in attesa che la dialog venga gestita
+    page.click('#login-btn');
 
     const dialog = await dialogPromise;
     expect(dialog.message()).toContain('3 caratteri');
@@ -28,7 +29,8 @@ test.describe('Login', () => {
     await page.goto('/');
 
     const dialogPromise = page.waitForEvent('dialog');
-    await page.click('#login-btn');
+    // Non await-are: click blocca in attesa che la dialog venga gestita
+    page.click('#login-btn');
 
     const dialog = await dialogPromise;
     expect(dialog.message()).toBeTruthy();
