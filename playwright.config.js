@@ -12,9 +12,9 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:8000',
     headless: true,
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
-    trace: 'retain-on-failure',
+    screenshot: 'on',
+    video: 'on',
+    trace: 'on',
   },
 
   projects: [

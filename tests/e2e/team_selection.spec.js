@@ -1,5 +1,5 @@
-const { test, expect } = require('@playwright/test');
-const { uniqueNick, login, createDuel, joinDuel, addZenamon } = require('./helpers');
+import { test, expect } from '@playwright/test';
+import { uniqueNick, login, createDuel, joinDuel, addZenamon } from './helpers.js';
 
 // Helper interno: porta page1 alla schermata di selezione
 async function setupSelectionPage(browser) {

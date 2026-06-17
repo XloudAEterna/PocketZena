@@ -53,4 +53,4 @@ async function confirmTeam(page) {
   await page.waitForSelector('#confirm-team-btn[disabled]');
 }
 
-module.exports = { uniqueNick, login, createDuel, joinDuel, addZenamon, confirmTeam };
+export { uniqueNick, login, createDuel, joinDuel, addZenamon, confirmTeam };
