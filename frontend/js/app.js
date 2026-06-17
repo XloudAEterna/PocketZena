@@ -267,12 +267,20 @@ document.getElementById('join-duel-btn').onclick = async () => {
     if (data.success) {
         state.duelCode = code;
         state.role = 'PLAYER';
-        showPage('selection-page');
+        document.getElementById('display-duel-code').innerText = state.duelCode;
+        showPage('lobby-page');
         startPolling();
     } else {
-        const msg = data.detail ? (Array.isArray(data.detail) ? data.detail[0].msg : data.detail) : "Impossibile partecipare";
+        const msg = data.detail ? (Array.isArray(data.detail) ? data.detail[0].msg : data.detail) : "Errore nell'unirsi al duello";
         alert("Errore: " + msg);
     }
+};
+document.getElementById('cancel-search-btn').onclick = () => {
+    if (state.pollingInterval) {
+        clearInterval(state.pollingInterval);
+        state.pollingInterval = null;
+    }
+    showPage('menu-page');
 };
 
 // --- Polling ---
