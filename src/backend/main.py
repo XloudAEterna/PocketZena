@@ -12,13 +12,13 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from backend.models.database import SessionLocal, engine, Base, Player, Duel, ZenamonCache, DuelZenamon, Turn, Reaction, init_db, BASE_DIR
-from backend.schemas.player import PlayerCreate, PlayerResponse
-from backend.schemas.duel import DuelCreateResponse, DuelJoinResponse, DuelSpectateResponse
-from backend.schemas.zenamon import ZenamonResponse, TeamCreate, ZenamonSearchResult
-from backend.schemas.battle import BattleStatusResponse, PlayerBattleStatus, BattleAction, ReactionCreate
-from backend.pokeapi_client import get_zenamon_data, search_zenamon_names, get_zenamon_basic_data
-from backend.battle_engine import resolve_turn
+from models.database import SessionLocal, engine, Base, Player, Duel, ZenamonCache, DuelZenamon, Turn, Reaction, init_db, BASE_DIR
+from schemas.player import PlayerCreate, PlayerResponse
+from schemas.duel import DuelCreateResponse, DuelJoinResponse, DuelSpectateResponse
+from schemas.zenamon import ZenamonResponse, TeamCreate, ZenamonSearchResult
+from schemas.battle import BattleStatusResponse, PlayerBattleStatus, BattleAction, ReactionCreate
+from pokeapi_client import get_zenamon_data, search_zenamon_names, get_zenamon_basic_data
+from battle_engine import resolve_turn
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -480,6 +480,6 @@ async def health_check():
 
 # Monta i file statici del frontend alla fine per non interferire con le rotte API
 # Usiamo percorsi assoluti per robustezza su PythonAnywhere
-frontend_path = os.path.join(BASE_DIR, "frontend")
-app.mount("/frontend", StaticFiles(directory=frontend_path, html=True), name="frontend_static")
-app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend_root")
+#frontend_path = os.path.join(BASE_DIR, "frontend")
+#app.mount("/frontend", StaticFiles(directory=frontend_path, html=True), name="frontend_static")
+#app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend_root")

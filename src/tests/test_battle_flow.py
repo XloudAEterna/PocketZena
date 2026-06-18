@@ -2,8 +2,8 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from backend.main import app, get_db
-from backend.models.database import Base, ZenamonCache, DuelZenamon, Duel
+from src.backend.main import app, get_db
+from src.backend.models.database import Base, ZenamonCache, DuelZenamon, Duel
 import json
 
 # Setup database per i test

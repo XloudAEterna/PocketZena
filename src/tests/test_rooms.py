@@ -2,8 +2,8 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from backend.main import app, get_db
-from backend.models.database import Base, Player, Duel, ZenamonCache, Turn, Reaction, DuelZenamon
+from src.backend.main import app, get_db
+from src.backend.models.database import Base, Player, Duel, ZenamonCache, Turn, Reaction, DuelZenamon
 
 # Setup database per i test
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test_rooms.sqlite3"
