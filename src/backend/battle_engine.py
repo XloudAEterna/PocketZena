@@ -1,7 +1,7 @@
 import random
 import json
 from sqlalchemy.orm import Session
-from .models.database import Duel, Player, DuelZenamon, ZenamonCache, Turn
+from models.database import Duel, Player, DuelZenamon, ZenamonCache, Turn
 
 
 def resolve_turn(duel: Duel, db: Session):

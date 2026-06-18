@@ -2,8 +2,8 @@ import pytest
 import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from backend.models.database import Base, ZenamonCache, Duel, Player, DuelZenamon, Turn
-from backend.battle_engine import resolve_turn
+from src.backend.models.database import Base, ZenamonCache, Duel, Player, DuelZenamon, Turn
+from src.backend.battle_engine import resolve_turn
 
 # Setup DB in memoria
 engine = create_engine("sqlite:///:memory:")

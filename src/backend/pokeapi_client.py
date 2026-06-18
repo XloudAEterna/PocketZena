@@ -3,7 +3,7 @@ import json
 import asyncio
 import os
 from sqlalchemy.orm import Session
-from .models.database import ZenamonCache, BASE_DIR
+from models.database import ZenamonCache, BASE_DIR
 from sqlalchemy import or_
 
 POKEAPI_BASE_URL = "https://pokeapi.co/api/v2"

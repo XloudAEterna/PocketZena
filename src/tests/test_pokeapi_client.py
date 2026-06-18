@@ -3,8 +3,8 @@ import json
 from unittest.mock import AsyncMock, patch, MagicMock
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from backend.models.database import Base, ZenamonCache
-from backend.pokeapi_client import get_zenamon_basic_data, get_zenamon_data
+from src.backend.models.database import Base, ZenamonCache
+from src.backend.pokeapi_client import get_zenamon_basic_data, get_zenamon_data
 import httpx
 
 # Setup database in memoria per i test

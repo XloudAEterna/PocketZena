@@ -16,8 +16,8 @@ if path not in sys.path:
 
 try:
     from a2wsgi import ASGIMiddleware
-    from backend.main import app
-    from backend.models.database import init_db
+    from src.backend.main import app
+    from src.backend.models.database import init_db
     
     # Forza l'inizializzazione del DB per ambienti WSGI dove il lifespan di FastAPI potrebbe non essere triggerato
     logger.info("Inizializzazione database via WSGI...")

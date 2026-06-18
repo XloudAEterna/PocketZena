@@ -1,0 +1,7 @@
+FROM python:3.14-trixie
+WORKDIR /app
+COPY src/backend /app/backend
+COPY src/requirements.txt /app/
+RUN pip3.14 install -r requirements.txt
+WORKDIR /app/backend
+CMD ["uvicorn", "main:app", "--reload"]
