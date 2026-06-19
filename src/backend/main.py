@@ -6,6 +6,7 @@ import asyncio
 import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, Header, status, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
@@ -35,6 +36,13 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(title="POCKET-ZENA API", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Gestore eccezioni globale per catturare errori 500 e garantire risposte JSON
 @app.exception_handler(Exception)
