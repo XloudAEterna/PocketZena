@@ -75,6 +75,10 @@ per entrambi i problemi dobbiamo innanzitutto metterci d'accordo su un gitflow:
 - quando viene creata una tagged release su github faremo il deploy sul server nell'ambiente di PROD
 - quando viene fatto un push su un branch chiamato preprod verra' fatto il deploy sul server nell'ambiente di PREPROD
 - l'ambiente di dev e' puramente locale e non ci sono automazioni che riguardano il server remoto, 
+issue 1 -> abbiamo modificato il codice per gestire due env vars, poiche' controlliamo l'ambiente dove parte il programma
+possiamo controllare quali env vars sono disponibili al programma
+issue 2 -> poiche' non possiamo controllare le env var sul browser dell'utente iniettiamo un file js separato a seconda dell'ambiente dove siamo
+che si occupera' di creare la API_BASE del nostro frontend in maniera diversa a seconda dell'ambiente dove siamo.
 
 GITFLOW:
 - i developers si occuperanno di riportare le modifiche in maniera appropriata attraverso merge, rebase, cherrypick, etc. tra i diversi branch.
