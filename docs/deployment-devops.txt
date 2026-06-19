@@ -85,3 +85,9 @@ GITFLOW:
 - quando il branch develop viene mergiato su main il codice e' accettato per PROD
 - quando dal branch PROD vengono fatte tagged release viene assegnato alle release un numero di versione (semantic versioning) e il codice viene deployato sul server
 - il pattern di aggiornamento dell'applicazione e' un rebuild e restart, upgrade in place
+
+BRANCHES:
+- main: tracking del codice principale
+- develop: e' il branch dal quale i developers partiranno per creare i branch feature/<name> e sul quale andranno risolti i merge-conflicts
+- preprod: e' il branch sul quale viene mergiato develop e dal quale facciamo i deployment in PREPROD
+- tagged release da main: qui gestiamo il versioning e i deployment di produzione.
