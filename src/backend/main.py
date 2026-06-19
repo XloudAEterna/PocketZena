@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from models.database import SessionLocal, engine, Base, Player, Duel, ZenamonCache, DuelZenamon, Turn, Reaction, init_db, BASE_DIR
+from models.database import SessionLocal, engine, Base, Player, Duel, ZenamonCache, DuelZenamon, Turn, Reaction, init_db
 from schemas.player import PlayerCreate, PlayerResponse
 from schemas.duel import DuelCreateResponse, DuelJoinResponse, DuelSpectateResponse
 from schemas.zenamon import ZenamonResponse, TeamCreate, ZenamonSearchResult

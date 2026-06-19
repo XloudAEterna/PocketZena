@@ -3,7 +3,7 @@ import json
 import asyncio
 import os
 from sqlalchemy.orm import Session
-from models.database import ZenamonCache, BASE_DIR
+from models.database import ZenamonCache, CACHE_BASEDIR
 from sqlalchemy import or_
 
 POKEAPI_BASE_URL = "https://pokeapi.co/api/v2"
@@ -17,7 +17,7 @@ async def _get_all_names():
     if _ZENAMON_NAMES_CACHE:
         return _ZENAMON_NAMES_CACHE
     
-    cache_file = os.path.join(BASE_DIR, "zenamon_names.json")
+    cache_file = os.path.join(CACHE_BASEDIR, "zenamon_names.json")
     
     async with _CACHE_LOCK:
         if _ZENAMON_NAMES_CACHE:

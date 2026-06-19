@@ -8,6 +8,9 @@ services:
     init: true
     ports:
       - "8000:8000"
+    environment:
+      - DB_BASEDIR=/app/db/development/
+      - CACHE_BASEDIR=/app/db/development/
     volumes:
       # Live reload: mount the source over the copied files
       - ../:/app
