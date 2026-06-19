@@ -1,0 +1,48 @@
+SIZING:
+QUANTE RISORSE SERVONO PER L'APPLICAZIONE?
+- QUANTI UTENTI LA USERANNO? 10, 10k-100k
+- QUANTE RISORSE VENGONO CONSUMATE PER UTENTE?
+- QUANTO E' L'OVERHEAD DI UTILIZZO DELLE RISORSE?
+- QUALI SONO I MINIMI?
+
+* sqlite3 (256MB / 0.5 core ) + backend fastapi ( 1GB / 1core ) su python3.14 + webserver ( 128MB / 0.5 core)
+
+* postgres (4GB / 4 core ) + + backend fastapi ( 1GB / 1core ) + webserver ( 128MB / 0.5 core) / storage DB (veloce): 100MB
+
+DEVOPS:
+- applicazione web su server con min. 4GB RAM / 4 core / 30GB di disco
+- server linux
+- la parte stateful e' il db sqlite3 che viene creato nella stessa cartella dove viene lanciato uvicorn.
+- frontend servito da un server http generico
+
+LIFECYCLE:
+UPTIME (service level agreement):
+- 24/7/365 - SLA:99.999% 
+- 24/7/365 - SLA:99.9%
+- 12/7/360 - SLA:99.999%
+- 1/1/1 - SLA: 99.999%
+
+PATCHING e RELEASES:
+- aggiornamenti di sicurezza: entro tre giorni dalla pubblicazione della CVE/patch ufficiale
+- release a cadenza trimestrale
+
+- patching mensile
+- release on demand
+
+
+
+
+
+CLIENT --> FRONTEND
+             |
+CLIENT <-----|
+  |
+  |------> BACKEND
+
+PROD:  
+1) client chiama zenapocket.zena.monster
+2) client chiama backend.zena.monster
+
+PREPROD:  
+1) client chiama test-zenapocket.zena.monster
+2) client chiama test-backend.zena.monster
