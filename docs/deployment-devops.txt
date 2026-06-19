@@ -29,20 +29,59 @@ PATCHING e RELEASES:
 - patching mensile
 - release on demand
 
+DEPLOYMENT:
+il codice verra' interamente containerizzato in due container separati tra fe e be, questo permette di aggiornare i due pezzi separatamente, 
+specialmente il webserver di prod, separandolo dai framework usati nel be e rendendo il patching ed il mantenimento piu' facili da gestire.
+Inoltre la separazione permetterebbe di gestire loadbalancers, eventuali improvement con sessioni condivise (es. redis) ed altre implementazioni 
+future in maniera piu' facile.
+poiche' dobbiamo anche mantenere un release cycle veloce e vogliamo evitare di creare problemi con ambienti diversi (versioni di python, librerie, 
+os sul quale si sviluppa != os sul server, etc.) utilizziamo lo stesso pattern anche nel development utilizzando i devcontainers
 
 
-
-
+ARCHITETTURA:
+A)
 CLIENT --> FRONTEND
              |
-CLIENT <-----|
+CLIENT <-----| (html statico e js vanilla)
   |
-  |------> BACKEND
+  |------> BACKEND (chiamate a fastapi effettuate tramite il js statico servito prima)
 
-PROD:  
-1) client chiama zenapocket.zena.monster
-2) client chiama backend.zena.monster
+B) si potrebbe anche utilizzare un singolo reverse proxy che serve il FE ed il BE dietro la stessa URL, e' la soluzione piu' semplice,
+sarebbe preferibile in questo caso ma poiche' questo e' un corso utilizzeremo la soluzione A, che e' piu' strutturata e aderente alla realta'
+dei deployment di applicazioni piu' complesse.
 
-PREPROD:  
-1) client chiama test-zenapocket.zena.monster
-2) client chiama test-backend.zena.monster
+
+AMBIENTI:
+
+A) PROD:  
+   - client chiama zenapocket.zena.monster
+   - client chiama backend.zena.monster
+
+B) PREPROD:   
+   - client chiama test-zenapocket.zena.monster
+   - client chiama test-backend.zena.monster
+
+C) DEVELOPMENT (devcontainer):
+   - client chiama 127.0.0.1:8080 per il frontend
+   - client chiama 127.0.0.1:8000 per il backend
+
+ISSUES/TODO:
+1) LA CARTELLA CON IL DATABASE DEVE ESSERE PREVEDIBILE E GESTIBILE DURANTE IL DEPLOYMENT
+2) il valore della API_BASE in app.js deve essere diverso a seconda dell'ambiente.
+
+
+SOLUZIONE ALLE ISSUES:
+per entrambi i problemi dobbiamo innanzitutto metterci d'accordo su un gitflow:
+- quando viene creata una tagged release su github faremo il deploy sul server nell'ambiente di PROD
+- quando viene fatto un push su un branch chiamato preprod verra' fatto il deploy sul server nell'ambiente di PREPROD
+- l'ambiente di dev e' puramente locale e non ci sono automazioni che riguardano il server remoto, 
+
+GITFLOW:
+- i developers si occuperanno di riportare le modifiche in maniera appropriata attraverso merge, rebase, cherrypick, etc. tra i diversi branch.
+- i developers useranno dei branch feature/<name> facendo un branch a partire da quello develop per sviluppare/testare le funzionalita'
+- quando una feature e' completata il branch feature/<name> verra' mergiato verso develop
+- quando il branch develop viene mergiato verso il branch preprod il codice verra' automaticamente buildato (voce del verbo buildare) 
+  e deployato (idem) sul server come da automazioni CI/CD
+- quando il branch develop viene mergiato su main il codice e' accettato per PROD
+- quando dal branch PROD vengono fatte tagged release viene assegnato alle release un numero di versione (semantic versioning) e il codice viene deployato sul server
+- il pattern di aggiornamento dell'applicazione e' un rebuild e restart, upgrade in place
