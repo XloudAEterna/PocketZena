@@ -2,10 +2,33 @@ from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import sessionmaker, declarative_base
 import datetime
 import os
+import sys
 
-# Calcola il percorso assoluto della cartella principale del progetto
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DB_PATH = os.path.join(BASE_DIR, "pocket_zena.sqlite3")
+# CORSO
+# controlliamo che la variabile d'ambiente DB_BASEDIR sia settata, se non lo e' usciamo dal programma
+try:
+    db_basedir = os.environ["DB_BASEDIR"]
+except KeyError:
+    sys.exit("CRITICAL: DB_BASEDIR environment variable missing.")
+
+try:
+    CACHE_BASEDIR = os.environ["CACHE_BASEDIR"]
+except KeyError:
+    sys.exit("CRITICAL: CACHE_BASEDIR environment variable missing.")
+
+# CORSO
+# usiamo il valore di db_basedir e se non c'e' usiamo un default, e' impossibile che non ci sia perche'
+# abbiamo fatto il controllo sopra, ma questo e' il modo pythonico di usare un valore di default in caso
+# non sia settata una env var
+db_basedir = os.environ.get("DB_BASEDIR", "/app/db/development/")
+
+# CORSO
+# la riga sotto legge il path assoluto dove e' stato lanciato il programma per scriverci poi il db
+# antipattern!
+#BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Calcola il percorso relativo del DB a partire dalla ENV var DB_PATH
+DB_PATH = os.path.join(db_basedir, "pocket_zena.sqlite3")
 
 SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
 
