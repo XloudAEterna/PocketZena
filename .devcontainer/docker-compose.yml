@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  development:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile-backend
+    init: true
+    ports:
+      - "8000:8000"
+    volumes:
+      # Live reload: mount the source over the copied files
+      - ../:/app
+      #- src/requirements.txt:/app/requirements.txt:ro
+    # Override the Dockerfile CMD so --reload picks up the mounted source
+    #command: ["cd", "src/backend", "&&", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+    working_dir: /app
+    command: ["sleep", "infinity"]
+
+  frontend:
+    build:
+      dockerfile: Dockerfile-frontend
+    init: true
+    ports:
+      - "8080:80"
+    volumes:
+      # Live reload of static assets
+      - ../src/frontend:/usr/share/nginx/html:ro
+      # Reverse proxy /api/ -> backend:8000
+      # - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro

@@ -1,0 +1,4 @@
+FROM python:3.14-trixie
+WORKDIR /app
+COPY src/requirements.txt /app/
+RUN pip3.14 install -r requirements.txt
