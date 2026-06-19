@@ -1,0 +1,1 @@
+window.__API_BASE__ = 'https://backend.zena.monster/api/v1';
