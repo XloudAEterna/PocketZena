@@ -1,4 +1,4 @@
-const API_BASE = 'http://127.0.0.1:8000/api/v1';
+const API_BASE = window.__API_BASE__ || '/api/v1';
 let state = {
     playerId: null,
     nickname: '',

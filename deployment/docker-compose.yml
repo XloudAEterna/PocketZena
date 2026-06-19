@@ -1,0 +1,32 @@
+version: "3.9"
+
+# Server-side compose: builds both services from the local Dockerfiles.
+# TLS termination is deferred — containers serve plain HTTP.
+#
+# Usage:
+#   APP_ENV=prod    docker compose up -d --build
+#   APP_ENV=preprod docker compose up -d --build
+#
+# APP_ENV selects which frontend config.js is baked into the image
+# (config.prod.js / config.preprod.js / config.dev.js).
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: deployment/container/Dockerfile-backend
+    init: true
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: deployment/container/Dockerfile-frontend
+      args:
+        APP_ENV: ${APP_ENV:-prod}
+    init: true
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend

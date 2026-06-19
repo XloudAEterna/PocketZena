@@ -25,7 +25,6 @@ UPTIME (service level agreement):
 PATCHING e RELEASES:
 - aggiornamenti di sicurezza: entro tre giorni dalla pubblicazione della CVE/patch ufficiale
 - release a cadenza trimestrale
-
 - patching mensile
 - release on demand
 
