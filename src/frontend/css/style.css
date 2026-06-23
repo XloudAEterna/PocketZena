@@ -20,7 +20,10 @@ body {
 #app {
     width: 100%;
     max-width: 500px;
-    background: white;
+    background-image: linear-gradient(rgba(255,255,255,0.18), rgba(255,255,255,0.24)), url('../img/select.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;; /* SFONDO BIANCO PRINCIPALE DELL'APP */
     min-height: 600px;
     box-shadow: 0 0 20px rgba(0,0,0,0.1);
     position: relative;
@@ -38,22 +41,6 @@ body {
 }
 
 .hidden { display: none !important; }
-
-.search-item {
-    background: #f0f0f0;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: background 0.2s;
-    margin-bottom: 5px;
-}
-
-.search-item:hover {
-    background: #e0e0e0;
-}
 
 /* Animazioni */
 @keyframes pulse-red {
@@ -84,14 +71,14 @@ h1 { text-align: center; color: var(--secondary); }
 
 .room-page {
     position: relative;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 16px;
     background-color: #dce8df;
     background-image: linear-gradient(rgba(255,255,255,0.18), rgba(255,255,255,0.24)), url('../img/home.jpg');
     background-position: center;
     background-repeat: no-repeat;
     background-size: 100% 100%;
-    color: white;
+    color: rgb(42, 43, 44);
     text-shadow: 0 2px 4px rgba(0,0,0,0.65);
 }
 
@@ -102,11 +89,10 @@ h1 { text-align: center; color: var(--secondary); }
 .room-page .card,
 .room-page .menu-options,
 .room-page > p {
-    background: rgba(0,0,0,0.38);
-    border: 1px solid rgba(255,255,255,0.35);
+    background: rgb(228, 188, 8);
+    border: 5px solid rgba(145, 211, 244, 0.915);
     border-radius: 6px;
     padding: 16px;
-    backdrop-filter: blur(2px);
 }
 
 .room-page .menu-options {
@@ -141,23 +127,37 @@ h1 { text-align: center; color: var(--secondary); }
     padding: 14px 18px;
 }
 
-.result-page button {
-    background: rgba(42,117,187,0.92);
-    border: 1px solid rgba(255,255,255,0.5);
-}
-
+/* --- PULSANTI ACCATTIVANTI AGGIORNATI --- */
 button {
-    background: var(--secondary);
+    background: linear-gradient(180deg, #329fff 0%, #2a75bb 100%);
     color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
+    border: 3px solid #ffcb05;
+    padding: 12px 24px;
+    border-radius: 25px;
     cursor: pointer;
     font-size: 16px;
-    margin: 5px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    transition: all 0.2s ease-in-out;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    font-family: inherit;
 }
 
-button:hover { opacity: 0.9; }
+button:hover {
+    background: linear-gradient(180deg, #ffcb05 0%, #e0b404 100%);
+    border-color: #2a75bb;
+    color: #2a75bb;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    text-shadow: none;
+}
+
+button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
 
 input {
     padding: 10px;
@@ -168,19 +168,20 @@ input {
 }
 
 .search-item {
-    background: #f0f0f0;
+    background: #4790d5;
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 3px solid #e9de0b;
     border-radius: 5px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 10px;
     transition: background 0.2s;
+    margin-bottom: 5px;
 }
 
 .search-item:hover {
-    background: #e0e0e0;
+    background: #f6f4f6;
 }
 
 .search-item img {
@@ -222,6 +223,7 @@ input {
     width: 100%;
     height: 10px;
     background: #ccc;
+    border: 3px solid #ffe600;
     border-radius: 5px;
     overflow: hidden;
 }
@@ -233,17 +235,28 @@ input {
     transition: width 0.5s ease;
 }
 
+
+/* 1. Rimuove il padding solo quando la pagina mostra la battaglia */
+.page:has(.battle-arena) {
+    padding: 0 !important;
+}
+
+/* 2. Aggiorna la tua classe .battle-arena così */
 .battle-arena {
     flex: 1;
-    background: #fff url('../img/bg-battle.png') no-repeat center; /* Placeholder */
+    width: 100%;
+    height: 100%;
+    background: url('../img/arena.jpg') no-repeat center center;
     background-size: cover;
+    
+    /* Copre qualsiasi trasparenza o rimasuglio dello sfondo di #app */
+    background-color: #000; 
+    
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    align-items: center;
-    position: relative;
+    
 }
-
 .zenamon-sprite-container img {
     width: 150px;
     height: 150px;
