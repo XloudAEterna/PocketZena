@@ -87,7 +87,7 @@ h1 { text-align: center; color: var(--secondary); }
     justify-content: center;
     gap: 16px;
     background-color: #dce8df;
-    background-image: linear-gradient(rgba(255,255,255,0.18), rgba(255,255,255,0.24)), url('../img/pokewallpaper.jpg');
+    background-image: linear-gradient(rgba(255,255,255,0.18), rgba(255,255,255,0.24)), url('../img/home.jpg');
     background-position: center;
     background-repeat: no-repeat;
     background-size: 100% 100%;
