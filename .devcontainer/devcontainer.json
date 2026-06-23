@@ -14,7 +14,9 @@
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-azuretools.vscode-docker"
+        "ms-azuretools.vscode-docker",
+        "ritwickdey.liveserver",
+        "qwtel.sqlite-viewer"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/local/bin/python3.14",
