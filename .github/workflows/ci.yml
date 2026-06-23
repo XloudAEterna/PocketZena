@@ -25,5 +25,6 @@ jobs:
         pip install -r src/requirements.txt
 
     - name: Run Tests
-      run: |
-        pytest src/tests
+      env:
+        PYTHONPATH: .
+      run: pytest src/tests
