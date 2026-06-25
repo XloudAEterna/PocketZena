@@ -33,7 +33,32 @@
         <!-- Lobby Attesa -->
 <section id="lobby-page" class="page room-page hidden">
     <h1>In attesa di un avversario...</h1>
-    <p>Condividi questo codice: <span id="display-duel-code" class="highlight"></span></p>
+        <p>
+        Condividi questo codice: 
+        <span id="display-duel-code" class="highlight">IL_TUO_CODICE_QUI</span>
+        <button id="copy-btn" onclick="copiaCodice()">Copia codice</button>
+        </p>
+
+        <script>
+        function copiaCodice() {
+        // Seleziona il testo all'interno dello span
+        const codice = document.getElementById("display-duel-code").innerText;
+
+        // Usa l'API di sistema per copiare il testo negli appunti
+        navigator.clipboard.writeText(codice).then(() => {
+            // Opzionale: cambia il testo del pulsante per confermare la copia
+            const btn = document.getElementById("copy-btn");
+            btn.innerText = "Copiato!";
+            
+            // Ripristina il testo originale dopo 2 secondi
+            setTimeout(() => {
+            btn.innerText = "Copia codice";
+            }, 2000);
+        }).catch(err => {
+            console.error("Errore durante la copia: ", err);
+        });
+        }
+        </script>
     <button id="cancel-search-btn">❌ Annulla ricerca</button>
 </section>
 
