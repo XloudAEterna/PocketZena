@@ -1,4 +1,4 @@
-name: Deploy Main Branch
+name: Deploy Preprod Branch
 
 on:
   push:
