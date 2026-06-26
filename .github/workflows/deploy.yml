@@ -1,0 +1,25 @@
+name: Deploy Main Branch
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync-code:
+    runs-on: self-hosted
+    steps:
+      - name: Synchronize Repository to Work Directory
+        run: |
+          set -euo pipefail
+
+          if [ ! -d "/root/pocketzena/.git" ]; then
+            # Clean directory to ensure a pristine initial clone target
+            rm -rf /root/pocketzena
+            git clone -b main https://github.com/xloudaeterna/pocketzena.git /root/pocketzena
+          else
+            cd /root/pocketzena
+            git fetch origin main
+            # Override local changes automatically to prevent pipeline blocks during student testing
+            git reset --hard origin/main
+          fi
