@@ -1,0 +1,19 @@
+name: Verify Runner Connection
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check-runner:
+    runs-on: self-hosted
+    steps:
+      - name: Validate Environment
+        run: |
+          hostname
+          whoami
+
+      - name: Ensure Project Path Exists
+        run: |
+          mkdir -p /root/pocketzena
+          # Persist connection state to track node readiness for upcoming deployment stages
+          echo "connected" > /root/pocketzena/.runner_ok

@@ -1,0 +1,46 @@
+name: Deploy Preprod Branch
+
+on:
+  push:
+    branches:
+      - preprod
+
+jobs:
+  sync-code:
+    runs-on: self-hosted
+    steps:
+      - name: Synchronize Repository to Work Directory
+        run: |
+          set -euo pipefail
+
+          if [ ! -d "/root/pocketzena/.git" ]; then
+            # Clean directory to ensure a pristine initial clone target
+            rm -rf /root/pocketzena
+            git clone -b preprod https://github.com/xloudaeterna/pocketzena.git /root/pocketzena
+          else
+            cd /root/pocketzena
+            git fetch origin preprod
+            # Override local changes automatically to prevent pipeline blocks during student testing
+            git reset --hard origin/preprod
+          fi
+
+  build-code:
+    runs-on: self-hosted
+    needs: sync-code
+    steps:
+      - name: Build our containers on our server from the latest code tagging them as latest
+        run: |
+          set -euo pipefail
+          cd /root/pocketzena
+          buildah bud --layers -t localhost/pocketzena-preprod-fe:latest -f deployment/container/Dockerfile-frontend-preprod ./
+          buildah bud --layers -t localhost/pocketzena-preprod-be:latest -f deployment/container/Dockerfile-backend ./
+
+  deploy-containers:
+    runs-on: self-hosted
+    needs: build-code
+    steps:
+      - name: deploy our containers on our server from the latest container tag
+        run: |
+          set -euo pipefail
+          podman run --replace --name pocketzena-preprod-be -p 8001:8000 -d -v /root/pocketzena-data/preprod:/data -e DB_BASEDIR=/data -e CACHE_BASEDIR=/data localhost/pocketzena-preprod-be:latest
+          podman run --replace --name pocketzena-preprod-fe -p 8080:80 -d localhost/pocketzena-preprod-fe:latest

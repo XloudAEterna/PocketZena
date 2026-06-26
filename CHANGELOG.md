@@ -11,10 +11,14 @@ Tutti i cambiamenti significativi a questo progetto saranno documentati in quest
 - Animazioni CSS `pulse-damage` e `float-up` per feedback visivo durante il duello.
 - Visualizzazione HP (attuale/massimo) nella schermata di switch.
 - Configurazione della pipeline CI/CD tramite GitHub Actions (`.github/workflows/`).
-- Workflow per test automatizzati e deploy automatico del frontend su GitHub Pages.
+- Workflow per test automatizzati via GitHub Actions.
 - Adattatore WSGI `passenger_wsgi.py` per il supporto a PythonAnywhere.
 - Guida dettagliata al deploy in `docs/deploy.md`.
 - Manuale di gioco per l'utente finale in `docs/manuale.md`.
+
+### Rimosso
+- Supporto al deploy su GitHub Pages: il progetto ora utilizza esclusivamente PythonAnywhere per servire sia il frontend che il backend.
+- Configurazione CORS wildcard (`*`) nel backend: rimosso il supporto a origini esterne per migliorare la sicurezza.
 
 ### Corretto
 - Risolto errore CORS e configurazione dinamica API: implementato il rilevamento automatico dell'URL backend in `frontend/js/app.js` (usando percorsi relativi quando possibile) per garantire il corretto funzionamento sia in locale che in produzione.

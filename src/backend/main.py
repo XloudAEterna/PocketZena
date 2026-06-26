@@ -8,7 +8,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, Header, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -54,15 +53,6 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"detail": "Errore interno del server", "message": str(exc)},
     )
 
-# Configurazione CORS ottimizzata per produzione
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],
-)
 
 # Dependency per il database
 def get_db():

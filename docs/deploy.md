@@ -1,6 +1,6 @@
 # Guida al Deploy - POCKET-ZENA
 
-Questa guida spiega come distribuire il progetto **POCKET-ZENA** utilizzando **PythonAnywhere** per il backend e **GitHub Pages** per il frontend.
+Questa guida spiega come distribuire il progetto **POCKET-ZENA** utilizzando **PythonAnywhere**.
 
 ## 1. Backend (PythonAnywhere)
 
@@ -32,27 +32,9 @@ PythonAnywhere è ideale per questo progetto perché offre un filesystem persist
 4. **Database**:
    - Il database `pocket_zena.sqlite3` verrà creato automaticamente nella cartella root al primo avvio.
 
-## 2. Frontend (GitHub Pages)
-
-Il frontend viene distribuito automaticamente tramite GitHub Actions.
-
-### Passaggi:
-1. **Abilita GitHub Pages**:
-   - Vai nelle **Settings** del tuo repository su GitHub.
-   - Vai in **Pages**.
-   - Sotto **Build and deployment**, imposta la sorgente su **GitHub Actions** (oppure lascia che l'action crei il branch `gh-pages` e seleziona quello).
-2. **Configura l'URL dell'API**:
-   - Prima di fare il deploy, apri `frontend/js/app.js`.
-   - Modifica `API_BASE` per puntare al tuo indirizzo PythonAnywhere (es. sidaryldz):
-     ```javascript
-     const API_BASE = 'https://sidaryldz.pythonanywhere.com/api/v1';
-     ```
-
-## 3. Pipeline CI/CD
-
-Il progetto include due workflow in `.github/workflows`:
+## 2. Pipeline CI
+Il progetto include un workflow in `.github/workflows`:
 - **CI - Test**: Esegue i test automatizzati ad ogni push su `main`.
-- **Deploy Frontend**: Esegue il deploy della cartella `frontend/` su GitHub Pages quando ci sono modifiche in quella cartella.
 
 ## Note sulla Sicurezza
 - Assicurati che `pocket_zena.sqlite3` sia nel tuo `.gitignore` per evitare di sovrascrivere il database di produzione con quello di sviluppo.
