@@ -4,4 +4,4 @@ COPY src/backend /app/backend
 COPY src/requirements.txt /app/
 RUN pip3.14 install -r requirements.txt
 WORKDIR /app/backend
-CMD ["uvicorn", "main:app", "--host 0.0.0.0"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0"]
