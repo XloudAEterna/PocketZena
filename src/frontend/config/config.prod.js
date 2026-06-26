@@ -1,1 +1,1 @@
-window.__API_BASE__ = 'https://backend.zena.monster/api/v1';
+window.__API_BASE__ = 'http://backend.zena.monster:8000/api/v1';
