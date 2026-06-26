@@ -8,6 +8,7 @@ on:
 jobs:
   sync-code:
     runs-on: self-hosted
+    needs: sync-code
     steps:
       - name: Synchronize Repository to Work Directory
         run: |
