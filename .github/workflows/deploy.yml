@@ -23,3 +23,12 @@ jobs:
             # Override local changes automatically to prevent pipeline blocks during student testing
             git reset --hard origin/main
           fi
+  build-code:
+    runs-on: self-hosted
+    steps:
+      - name: Build our containers on our server from the latest code
+        run: |
+          set -euo pipefail
+          cd /root/pocketzena
+          buildah bud --layers -t localhost/pocketzena-main-fe:latest -f deployment/container/Dockerfile-frontend ./
+          buildah bud --layers -t localhost/pocketzena-main-be:latest -f deployment/container/Dockerfile-backend ./
