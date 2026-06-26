@@ -42,5 +42,5 @@ jobs:
       - name: deploy our containers on our server from the latest container tag
         run: |
           set -euo pipefail
-          podman run --replace --name localhost/pocketzena-preprod- backend -p 8001:8000 -d -v /root/pocketzena-data/preprod:/data -e DB_BASEDIR=/data -e CACHE_BASEDIR=/data localhost/pocketzena-preprod-be:latest
-          podman run --replace --name localhost/pocketzena-frontend -p 8080:80 -d localhost/pocketzena-preprod-fe:latest
+          podman run --replace --name pocketzena-preprod-be -p 8001:8000 -d -v /root/pocketzena-data/preprod:/data -e DB_BASEDIR=/data -e CACHE_BASEDIR=/data localhost/pocketzena-preprod-be:latest
+          podman run --replace --name pocketzena-preprod-fe -p 8080:80 -d localhost/pocketzena-preprod-fe:latest
