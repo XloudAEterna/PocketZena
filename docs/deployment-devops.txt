@@ -47,12 +47,14 @@ le fasi sono:
 *da qualche parte*: esistono molte soluzioni per fare questa cosa, ad esempio github mette a disposizione degli ambienti appositi dove farlo.
 noi invece metteremo tutto sul nostro server cosi che voi abbiate visibilita' di cosa succede ed il processo di CICD vi sara' piu' tangibile.
 
-step 1: fare il pull del codice sul nostro server
 dobbiamo fare in modo che quando voi fate una operazione* sul server di github questa operazione venga anche fatta sul server.
 es: developer fa il push su un branch -> github.com riceve l'operazione -> il nuovo commit deve essere pullato automaticamente anche sul server
 perche' questa cosa avvenga dobbiamo installare un pezzo di software sul nostro server, questo software si collega a github.com 
 ed automagicamente le operazioni che avvengono sul repo github.com verranno riportate dal software sul server.
 
+step 1: fare il pull del codice sul nostro server
+step 2: usare podman/buildah installati sul server per fare la build delle immagini docker a partire dal codice appena pullato
+step 3: lanciare i container
 
 ARCHITETTURA:
 A)
