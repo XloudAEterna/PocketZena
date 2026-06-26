@@ -8,7 +8,6 @@ on:
 jobs:
   sync-code:
     runs-on: self-hosted
-    needs: sync-code
     steps:
       - name: Synchronize Repository to Work Directory
         run: |
@@ -26,6 +25,7 @@ jobs:
           fi
   build-code:
     runs-on: self-hosted
+    needs: sync-code
     steps:
       - name: Build our containers on our server from the latest code
         run: |
