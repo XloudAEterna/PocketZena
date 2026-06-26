@@ -3,7 +3,7 @@ name: Deploy Main Branch
 on:
   push:
     branches:
-      - main
+      - preprod
 
 jobs:
   sync-code:
@@ -16,12 +16,12 @@ jobs:
           if [ ! -d "/root/pocketzena/.git" ]; then
             # Clean directory to ensure a pristine initial clone target
             rm -rf /root/pocketzena
-            git clone -b main https://github.com/xloudaeterna/pocketzena.git /root/pocketzena
+            git clone -b preprod https://github.com/xloudaeterna/pocketzena.git /root/pocketzena
           else
             cd /root/pocketzena
-            git fetch origin main
+            git fetch origin preprod
             # Override local changes automatically to prevent pipeline blocks during student testing
-            git reset --hard origin/main
+            git reset --hard origin/preprod
           fi
 
   build-code:
@@ -32,8 +32,8 @@ jobs:
         run: |
           set -euo pipefail
           cd /root/pocketzena
-          buildah bud --layers -t localhost/pocketzena-main-fe:latest -f deployment/container/Dockerfile-frontend ./
-          buildah bud --layers -t localhost/pocketzena-main-be:latest -f deployment/container/Dockerfile-backend ./
+          buildah bud --layers -t localhost/pocketzena-preprod-fe:latest -f deployment/container/Dockerfile-frontend-preprod ./
+          buildah bud --layers -t localhost/pocketzena-preprod-be:latest -f deployment/container/Dockerfile-backend ./
 
   deploy-containers:
     runs-on: self-hosted
@@ -42,5 +42,5 @@ jobs:
       - name: deploy our containers on our server from the latest container tag
         run: |
           set -euo pipefail
-          podman run --replace --name pocketzena-backend -p 8000:8000 -d -v /root/pocketzena-data/prod:/data -e DB_BASEDIR=/data -e CACHE_BASEDIR=/data localhost/pocketzena-main-be:latest
-          podman run --replace --name pocketzena-frontend -p 80:80 -d localhost/pocketzena-main-fe:latest
+          podman run --replace --name pocketzena-preprod- backend -p 8001:8000 -d -v /root/pocketzena-data/preprod:/data -e DB_BASEDIR=/data -e CACHE_BASEDIR=/data localhost/pocketzena-preprod-be:latest
+          podman run --replace --name pocketzena-frontend -p 8080:80 -d localhost/pocketzena-preprod-fe:latest

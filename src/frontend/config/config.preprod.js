@@ -1,1 +1,1 @@
-window.__API_BASE__ = 'https://preprod-backend.zena.monster/api/v1';
+window.__API_BASE__ = 'https://preprod-backend.zena.monster:8001/api/v1';
