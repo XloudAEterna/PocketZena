@@ -1,0 +1,23 @@
+1) browser chiama http://pocketzena.zena.monster
+2) risoluzione dns: l'indirizzo IP che chiama e' quello del nostro server 
+3) il browser decide di usare la porta 80 perche' la chiamata usa il protocollo http
+4) sulla porta 80 del server risponde il nostro container del frontend
+5) viene servito il frotend al browser, compreso il javascript che fa le chiamate al backend
+6) nel javascript c'e' scritto di fare le chiamate backend all'indirizzo http://backend.zena.monster/api/v1
+7) risoluzione dns: l'indirizzo IP che chiama il javascript e' quello del nostro server
+8) il javascript chiama la porta 80 perche' il protocollo e' http
+9) SI ROMPE TUTTO, perche' sulla porta 80 del nostro server risponde il nostro frontend, non il nostro backend
+
+possibili soluzioni:
+1) inserire nel nostro config.js di produzione un indirizzo del backend con la porta 8000 nell'indirizzo, ovvero:
+http://backend.zena.monster:8000/api/v1
+-> e' poco elegante
+-> perche' usare un DNS diverso per il backend se tanto usiamo una porta diversa? potremmo anche chiamare
+http://pocketzena.zena.monster:8000/api/v1
+
+2) fare in modo che quando chiamiamo il server con un nome di dominio specifico noi mandiamo 
+le chiamate ad una porta diversa
+
+es: 
+- chiamo il server come http://pocketzena.zena.monster -> il server mi manda al container del frontend
+- chiamo il server come http://backend.zena.monster -> il server mi manda al container del backend
